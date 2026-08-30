@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morphocomp · 형태가 계산한다</title>
+<link rel="stylesheet" href="style.css?v=29">
+</head>
+<body>
+
+<header class="masthead" id="top">
+  <p class="masthead__eyebrow">디자인 스터디 · 인터페이스는 화면과 센서에서 끝나는가</p>
+  <h1 class="masthead__title">형태가 계산한다</h1>
+  <p class="masthead__lead">
+    우리는 계산을 컴퓨터 안에서만 찾습니다.<br>
+    하지만 깔때기, 스프링, 지퍼, 천에는 소프트웨어가 없는데도 입력을 받아 변환하고 결과를 냅니다.<br>
+    이 페이지는 <strong>형태·재질·구조가 소프트웨어를 대신하는 사례</strong>를 직접 만져보며 이해하기 위한 자료입니다.
+  </p>
+</header>
+
+<div class="topbar" id="topbar">
+  <div class="topbar__inner">
+    <a href="#top" class="topbar__title">형태가 계산한다</a>
+    <nav class="topbar__nav" aria-label="목차">
+      <a href="#everyday">일상의 사례</a>
+      <a href="#research">연구 사례</a>
+      <a href="#theory">이론적 배경</a>
+      <a href="#tradeoff">무엇을 재료로</a>
+      <a href="#sources">출처</a>
+    </nav>
+  </div>
+  <div class="subbar" id="subbar" hidden><div class="subbar__inner" id="subbar-inner"></div></div>
+</div>
+
+<main>
+
+<!-- ================================================================
+     0. 깔때기: 도입 인터랙션
+     ================================================================ -->
+<section class="section section--intro" id="intro">
+  <div class="demo demo--full">
+    <div class="demo__stage">
+      <canvas id="funnel" width="720" height="360" aria-label="깔때기 시뮬레이션"></canvas>
+      <p class="demo__hint">캔버스 위쪽 아무 곳이나 클릭하거나 드래그해서 물방울을 떨어뜨려 보세요.</p>
+    </div>
+    <div class="demo__text">
+      <h2 class="demo__title">깔때기는 "어디로 모을지"를 계산하지 않는다</h2>
+      <p>어디에 떨어뜨리든 결과는 하나의 출구입니다. 입력의 위치 정보는 형태에 의해 버려지고, 출력은 항상 같습니다.
+      소프트웨어로 쓰면 <code>x = center</code> 한 줄이지만, 깔때기는 그 한 줄을 전원 없이, 지연 없이, 고장 없이 실행합니다.</p>
+      <p class="demo__note">이 페이지의 모든 데모는 물성을 <em>설명하기 위한</em> 시뮬레이션입니다. 실제 물건은 이 코드 없이 같은 일을 합니다. 그 차이가 이 주제의 핵심입니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     1. 일상의 사례
+     ================================================================ -->
+<section class="section" id="everyday">
+  <header class="section__head">
+    <h2 class="section__title">일상의 사례 : 이미 형태가 소프트웨어를 대신하고 있다</h2>
+    <p class="section__lead">각 카드의 <b>코드 / 재료</b> 토글을 눌러 같은 기능을 두 방식으로 비교해 보세요.</p>
+  </header>
+
+  <!-- 1-1 바이메탈 -->
+  <article class="case" id="sec-bimetal">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/bimetal_photo.jpg" alt="차단기에서 꺼낸 바이메탈 스트립" loading="lazy">
+        <figcaption>차단기 내부의 바이메탈 스트립. 사진: Dmitry G, CC BY-SA 3.0</figcaption>
+      </figure>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">바이메탈 온도조절기 <span class="case__tag">센서 + 비교기 + 스위치 = 금속 한 장</span></h3>
+      <p>팽창률이 다른 두 금속을 붙이면, 온도가 오를수록 한쪽이 더 늘어나 판이 휩니다. 휘어진 판이 접점에서 떨어지면 회로가 끊깁니다.
+      온도를 "읽고", 기준과 "비교하고", 출력을 "끄는" 세 단계가 재료 하나에 들어 있습니다. 구형 보일러·다리미·차단기가 이 원리입니다.</p>
+
+      <div class="demo">
+        <div class="demo__stage">
+          <svg id="bimetal-svg" viewBox="0 0 400 250" class="svg-demo" aria-label="바이메탈 온도조절기 회로 도해">
+            <!-- 회로 배선: 클램프 → 아래 → 전지 → 히터 → 접점 기둥 -->
+            <path id="bimetal-wire" d="M37 122 L37 200 L300 200 L300 128" stroke="#bbb" stroke-width="2" fill="none"/>
+            <path id="bimetal-current" d="M37 122 L37 200 L300 200 L300 128" stroke="#111" stroke-width="2" fill="none" stroke-dasharray="4 6" class="current"/>
+            <!-- 전지 -->
+            <g transform="translate(90,200)">
+              <rect x="-14" y="-10" width="28" height="20" fill="#f5f5f5"/>
+              <line x1="-6" y1="-10" x2="-6" y2="10" stroke="#111" stroke-width="3"/>
+              <line x1="4" y1="-5" x2="4" y2="5" stroke="#111" stroke-width="1.5"/>
+              <text x="0" y="24" text-anchor="middle" font-size="9" font-family="monospace" fill="#888">전원</text>
+            </g>
+            <!-- 히터 -->
+            <g transform="translate(200,200)">
+              <rect x="-30" y="-10" width="60" height="20" fill="#f5f5f5"/>
+              <path id="bimetal-heater" d="M-26 0 l5 -7 l7 14 l7 -14 l7 14 l7 -14 l7 14 l5 -7" stroke="#111" stroke-width="2.5" fill="none"/>
+              <text id="bimetal-heater-label" x="0" y="24" text-anchor="middle" font-size="9" font-family="monospace" fill="#888">히터 ON</text>
+            </g>
+            <!-- 고정 클램프 -->
+            <rect x="30" y="66" width="14" height="56" fill="#111"/>
+            <!-- 바이메탈: 위 = 팽창 큰 금속(검정), 아래 = 팽창 작은 금속(회색) -->
+            <path id="bimetal-top" d="" stroke="#111" stroke-width="7" fill="none"/>
+            <path id="bimetal-bot" d="" stroke="#9a9a9a" stroke-width="7" fill="none"/>
+            <!-- 접점 -->
+            <line x1="300" y1="128" x2="300" y2="106" stroke="#111" stroke-width="2"/>
+            <circle id="bimetal-pad" cx="300" cy="106" r="4" fill="#111"/>
+            <!-- 라벨 -->
+            <g font-size="9" font-family="monospace" fill="#888">
+              <text x="170" y="74" text-anchor="middle">팽창이 큰 금속 (검정)</text>
+              <line x1="170" y1="77" x2="170" y2="90" stroke="#bbb" stroke-width="1"/>
+              <text x="170" y="122" text-anchor="middle">팽창이 작은 금속 (회색)</text>
+              <line x1="170" y1="100" x2="170" y2="113" stroke="#bbb" stroke-width="1"/>
+              <text x="318" y="110" id="bimetal-padlabel">접점</text>
+              <text x="60" y="74">고정</text>
+            </g>
+            <!-- 상태 / 온도계 -->
+            <text id="bimetal-state" x="30" y="30" class="svg-label" font-size="11">접점 닫힘 → 전류 흐름 → 히터 ON</text>
+            <g id="bimetal-badge" transform="translate(300,16)">
+              <rect id="bimetal-badge-box" x="0" y="0" width="44" height="22" rx="11" fill="#111" stroke="#111" stroke-width="1.5"/>
+              <text id="bimetal-badge-text" x="22" y="15" text-anchor="middle" font-size="11" font-weight="700" font-family="monospace" fill="#fff">ON</text>
+            </g>
+            <g id="bimetal-thermo" transform="translate(372,20)">
+              <rect x="-5" y="0" width="10" height="70" rx="5" fill="#fff" stroke="#111" stroke-width="1.5"/>
+              <rect id="bimetal-mercury" x="-2.5" y="60" width="5" height="8" fill="#111"/>
+              <circle cx="0" cy="72" r="7" fill="#111"/>
+              <text id="bimetal-tlabel" x="0" y="96" text-anchor="middle" font-size="10" font-family="monospace" fill="#111">20°C</text>
+              <line x1="-9" y1="21" x2="-5" y2="21" stroke="#111"/>
+              <text x="-12" y="24" text-anchor="end" font-size="8" font-family="monospace" fill="#888">70°</text>
+            </g>
+          </svg>
+          <label class="range">
+            <span>온도 <output id="bimetal-out">20</output>°C</span>
+            <input type="range" id="bimetal-temp" min="0" max="100" value="20">
+          </label>
+        </div>
+        <div class="compare">
+          <div class="compare__tabs" role="tablist">
+            <button class="compare__tab is-active" data-target="bimetal-code">코드</button>
+            <button class="compare__tab" data-target="bimetal-mat">재료</button>
+          </div>
+          <pre class="compare__panel is-active" id="bimetal-code"><code>loop:
+  t = read(sensor)      // 온도 센서
+  if t &gt; 70:            // 비교
+    relay.off()         // 액추에이터
+  else:
+    relay.on()
+  sleep(100ms)          // 전원·MCU·펌웨어 필요</code></pre>
+          <div class="compare__panel" id="bimetal-mat">
+            <p><b>센서</b> = 금속의 열팽창<br><b>비교</b> = 휨이 접점 간격을 넘는 순간<br><b>액추에이터</b> = 휘어진 판 자체</p>
+            <p class="muted">기준 온도는 코드가 아니라 <em>접점까지의 거리</em>에 저장되어 있습니다. 바꾸려면 나사를 돌립니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 1-2 USB-C -->
+  <article class="case" id="sec-usb">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/usbc.png" alt="USB-C 커넥터와 리셉터클 단면" loading="lazy">
+        <figcaption>USB-C 커넥터와 리셉터클. 상하 대칭 구조. 사진: Wikideas1, CC0</figcaption>
+      </figure>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">USB-A → USB-C <span class="case__tag">에러 처리를 형태로 삭제</span></h3>
+      <p>USB-A는 방향이 틀리면 "안 들어간다"는 형태 언어로 거부하지만, 사용자가 3번 뒤집게 만들었습니다.
+      USB-C는 커넥터를 상하 대칭으로 만들어 <em>잘못된 입력이라는 상태 자체를 없앴습니다</em>. 에러 메시지도, 방향 감지 센서도 필요 없습니다.</p>
+
+      <div class="demo">
+        <div class="demo__stage demo__stage--row">
+          <div class="usb">
+            <p class="usb__label">USB-A <span class="muted">비대칭 · 한 방향만 맞음</span></p>
+            <svg viewBox="0 0 220 120" class="usb__svg" id="usb-a">
+              <text id="usb-a-msg" x="110" y="18" text-anchor="middle" font-size="10" font-family="monospace" fill="#111"></text>
+              <!-- 포트 단면 (오른쪽, 고정) -->
+              <g transform="translate(130,40)">
+                <rect x="0" y="0" width="70" height="40" fill="#fff" stroke="#111" stroke-width="2.5"/>
+                <rect x="6" y="6" width="58" height="12" fill="#111"/>  <!-- 포트의 키(단자판): 위쪽 -->
+              </g>
+              <!-- 플러그 단면 (왼쪽, 포트 쪽으로 이동) -->
+              <g id="usb-a-plug" class="usb__plug">
+                <g id="usb-a-plugbody" transform="translate(20,40)">
+                  <g id="usb-a-rot">
+                  <rect x="0" y="0" width="70" height="40" fill="#e6e6e6" stroke="#111" stroke-width="2"/>
+                  <rect x="6" y="22" width="58" height="12" fill="#777" class="usb__key"/>  <!-- 플러그의 키: 아래쪽이어야 맞물림 -->
+                  </g>
+                </g>
+              </g>
+              <g id="usb-a-mark" opacity="0" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle">
+                <text id="usb-a-marktext" x="165" y="96" fill="#111">OK</text>
+              </g>
+              <text x="55" y="114" text-anchor="middle" font-size="9" font-family="monospace" fill="#888">플러그 단면</text>
+              <text x="165" y="114" text-anchor="middle" font-size="9" font-family="monospace" fill="#888" id="usb-a-portlabel">포트 단면</text>
+            </svg>
+            <button class="btn" data-usb="a">랜덤 방향으로 꽂기</button>
+            <p class="usb__stat">성공 <b id="usb-a-ok">0</b> · 실패 <b id="usb-a-fail">0</b></p>
+          </div>
+          <div class="usb">
+            <p class="usb__label">USB-C <span class="muted">상하 대칭 · 어느 방향이든 맞음</span></p>
+            <svg viewBox="0 0 220 120" class="usb__svg" id="usb-c">
+              <text id="usb-c-msg" x="110" y="18" text-anchor="middle" font-size="10" font-family="monospace" fill="#111"></text>
+              <!-- 포트 단면 (오른쪽, 고정) -->
+              <g transform="translate(130,40)">
+                <rect x="0" y="0" width="70" height="40" rx="20" fill="#fff" stroke="#111" stroke-width="2.5"/>
+                <rect x="10" y="16" width="50" height="8" rx="4" fill="#111"/>  <!-- 가운데 단자판: 상하 대칭 -->
+              </g>
+              <!-- 플러그 단면 (왼쪽, 포트 쪽으로 이동) -->
+              <g id="usb-c-plug" class="usb__plug">
+                <g id="usb-c-plugbody" transform="translate(20,40)">
+                  <g id="usb-c-rot">
+                  <rect x="0" y="0" width="70" height="40" rx="20" fill="#e6e6e6" stroke="#111" stroke-width="2"/>
+                  <rect x="10" y="16" width="50" height="8" rx="4" fill="#777" class="usb__key"/>
+                  </g>
+                </g>
+              </g>
+              <g id="usb-c-mark" opacity="0" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle">
+                <text id="usb-c-marktext" x="165" y="96" fill="#111">OK</text>
+              </g>
+              <text x="55" y="114" text-anchor="middle" font-size="9" font-family="monospace" fill="#888">플러그 단면</text>
+              <text x="165" y="114" text-anchor="middle" font-size="9" font-family="monospace" fill="#888" id="usb-c-portlabel">포트 단면</text>
+            </svg>
+            <button class="btn" data-usb="c">랜덤 방향으로 꽂기</button>
+            <p class="usb__stat">성공 <b id="usb-c-ok">0</b> · 실패 <b id="usb-c-fail">0</b></p>
+          </div>
+        </div>
+        <div class="compare">
+          <div class="compare__tabs">
+            <button class="compare__tab is-active" data-target="usb-code">코드</button>
+            <button class="compare__tab" data-target="usb-mat">재료</button>
+          </div>
+          <pre class="compare__panel is-active" id="usb-code"><code>if orientation != EXPECTED:
+  show("커넥터 방향을 확인하세요")
+  return ERROR
+// 실제 USB-A는 이 조건문을
+// 사용자의 손에 맡겼다</code></pre>
+          <div class="compare__panel" id="usb-mat">
+            <p>대칭 형태는 <code>orientation</code> 변수를 정의역에서 제거합니다. 조건문이 없는 게 아니라, <b>조건이 참이 될 수 있는 입력이 존재하지 않습니다</b>.</p>
+            <p class="muted">자동차 열쇠홈, 레고 브릭, 콘센트 극성도 같은 원리입니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 1-3 셔틀콕 / 수동 보행 -->
+  <article class="case" id="sec-shuttlecock">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/walker.gif" alt="경사로를 스스로 내려오는 수동 보행 로봇" loading="lazy">
+        <figcaption>모터·제어기 없이 경사로를 걷는 수동 보행기(passive dynamic walker). Stpedraz, CC BY-SA 4.0</figcaption>
+      </figure>
+      <figure class="figure figure--small">
+        <img src="img/shuttlecock.jpg" alt="깃털 셔틀콕" loading="lazy">
+        <figcaption>어떤 자세로 쳐도 코르크가 앞을 향하도록 정렬되는 셔틀콕. Stanislas PERRIN, Public domain</figcaption>
+      </figure>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">셔틀콕과 수동 보행기 <span class="case__tag">자세 제어 알고리즘 없이 안정 상태로 수렴</span></h3>
+      <p>셔틀콕은 무게중심이 앞, 공기저항이 뒤에 몰려 있어 어떻게 쳐도 공중에서 스스로 뒤집혀 정렬됩니다.
+      1990년 Tad McGeer의 수동 보행기는 다리 길이·질량 분포·경사만으로, 제어기 없이 안정적으로 걷습니다.
+      세그웨이가 자이로 센서와 PID 제어로 푸는 문제를 <em>형태의 역학</em>이 대신 풉니다.</p>
+
+      <div class="demo">
+        <div class="demo__stage">
+          <canvas id="shuttle" width="480" height="240" aria-label="셔틀콕 정렬 시뮬레이션"></canvas>
+          <div class="demo__controls">
+            <button class="btn" id="shuttle-hit">아무 각도로 치기</button>
+            <label class="check"><input type="checkbox" id="shuttle-uniform"> 균일한 형태로 바꾸기 (무게중심 = 저항중심)</label>
+          </div>
+          <p class="demo__hint">체크박스를 켜면 형태가 계산을 멈춥니다 · 회전이 감쇠되지 않고 방향이 정해지지 않습니다.</p>
+        </div>
+        <div class="compare">
+          <div class="compare__tabs">
+            <button class="compare__tab is-active" data-target="shuttle-code">코드</button>
+            <button class="compare__tab" data-target="shuttle-mat">재료</button>
+          </div>
+          <pre class="compare__panel is-active" id="shuttle-code"><code>loop:
+  θ = imu.pitch()
+  ω = imu.rate()
+  torque = Kp*θ + Kd*ω   // PID
+  motor.apply(torque)</code></pre>
+          <div class="compare__panel" id="shuttle-mat">
+            <p>무게중심과 압력중심의 <b>거리</b>가 곧 복원 토크의 이득(K)입니다. 감쇠는 공기저항이 담당합니다. 파라미터는 형태에 새겨져 있고, 전원이 없어도 항상 켜져 있습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 1-4 Edge-notched card -->
+  <article class="case" id="sec-notched">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/keysort.jpg" alt="McBee Keysort 가장자리 천공 카드 앞뒤" loading="lazy">
+        <figcaption>McBee Keysort 가장자리 천공 카드(1950–60년대). Museum of Obsolete Media, CC BY-SA 4.0</figcaption>
+      </figure>
+      <figure class="figure figure--small">
+        <img src="img/jacquard.jpg" alt="천공 카드로 패턴을 제어하는 자카드 직기" loading="lazy">
+        <figcaption>천공 카드가 직조 패턴을 "프로그램"하는 자카드 직기(1804). Stephencdickson, CC BY-SA 4.0</figcaption>
+      </figure>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">가장자리 천공 카드 <span class="case__tag">필터 쿼리를 종이 형태가 실행</span></h3>
+      <p>컴퓨터 이전 시대의 데이터베이스. 카드 가장자리 구멍을 태그 자리로 쓰고, 해당 태그가 있으면 구멍을 잘라 홈(notch)으로 만듭니다.
+      막대를 꽂고 들어올리면 홈이 난 카드만 떨어집니다. <code>WHERE tag = X</code>가 중력과 종이 형태로 실행됩니다.
+      막대를 두 개 꽂으면 AND, 두 번 나눠 하면 OR입니다.</p>
+
+      <div class="demo">
+        <div class="demo__stage">
+          <div class="cards" id="cards"></div>
+          <div class="demo__controls">
+            <span class="muted">막대를 꽂을 위치(태그):</span>
+            <div class="chips" id="card-tags"></div>
+            <button class="btn" id="card-lift">막대 들어올리기</button>
+            <button class="btn btn--ghost" id="card-reset">다시 모으기</button>
+          </div>
+        </div>
+        <div class="compare">
+          <div class="compare__tabs">
+            <button class="compare__tab is-active" data-target="card-code">코드</button>
+            <button class="compare__tab" data-target="card-mat">재료</button>
+          </div>
+          <pre class="compare__panel is-active" id="card-code"><code>SELECT * FROM cards
+WHERE 'design' IN tags
+  AND 'paper' IN tags;
+-- 인덱스, 스토리지, 쿼리 엔진 필요</code></pre>
+          <div class="compare__panel" id="card-mat">
+            <p>인덱스 = 구멍의 위치. 쿼리 = 막대의 위치. 실행 = 중력. 결과는 손에 남은 카드와 바닥에 떨어진 카드로 <b>물리적으로 분리</b>됩니다.</p>
+            <p class="muted">이 방식이 오늘 스터디의 "대신할 수 있는 사례"로 실제 제작하기 가장 쉬운 후보입니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 1-5 기타 일상 사례 -->
+  <div class="grid" id="sec-more">
+    <figure class="figure figure--card">
+      <img src="img/zipper.jpg" alt="지퍼 이빨 근접" loading="lazy">
+      <figcaption><b>지퍼</b> · 한 번의 직선 운동을 수십 개의 맞물림으로 순차 변환. 슬라이더의 Y자 통로가 "루프"입니다. Peter Southwood, CC BY-SA 4.0</figcaption>
+    </figure>
+    <figure class="figure figure--card">
+      <img src="img/hourglass.jpg" alt="모래시계" loading="lazy">
+      <figcaption><b>모래시계</b> · 타이머 앱의 <code>setTimeout</code>. 목의 지름과 모래 양이 상수입니다. John Morgan, CC BY 2.0</figcaption>
+    </figure>
+    <figure class="figure figure--card">
+      <img src="img/funnel.jpg" alt="깔때기" loading="lazy">
+      <figcaption><b>깔때기</b> · 입력의 위치 정보를 버리고 출력을 하나로 정규화. Metropolitan Museum, CC0</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================================================================
+     2. 연구 사례
+     ================================================================ -->
+<section class="section" id="research">
+  <header class="section__head">
+    <h2 class="section__title">연구 사례 : 물성을 센싱과 계산의 일부로</h2>
+    <p class="section__lead">인터랙션 디자인·HCI·로봇공학에서 "재료가 계산한다"를 실제로 만든 연구들. 웹 검색으로 사실 확인한 내용입니다.</p>
+  </header>
+
+  <!-- 2-1 bioLogic -->
+  <article class="case" id="sec-biologic">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/natto.png" alt="낫토균(Bacillus subtilis natto) 콜로니" loading="lazy">
+        <figcaption>bioLogic의 액추에이터, 낫토균(<i>Bacillus subtilis natto</i>) 콜로니. Catfaster, CC BY-SA 4.0 · 실제 bioLogic 사진은 <a href="https://tangible.media.mit.edu/project/biologic/" target="_blank" rel="noopener">MIT Tangible Media 프로젝트 페이지</a> 참조</figcaption>
+      </figure>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">bioLogic <span class="case__tag">MIT Media Lab Tangible Media Group, 2015</span></h3>
+      <p>낫토균 세포는 습도가 오르면 최대 50%까지 팽창합니다. 이 균을 천 위에 마이크론 해상도로 프린트하면,
+      땀이 나는 부위의 통기 플랩이 스스로 열리고 마르면 닫힙니다. 습도 센서·MCU·모터·배터리가 <b>미생물 한 층</b>으로 대체됩니다.
+      New Balance, RCA와 협업해 운동복으로 만들어졌습니다.</p>
+      <div class="demo">
+        <div class="demo__stage">
+          <svg id="biologic" viewBox="0 0 400 220" class="svg-demo" aria-label="bioLogic 플랩 시뮬레이션"></svg>
+          <label class="range">
+            <span>피부 습도 <output id="bio-out">30</output>%</span>
+            <input type="range" id="bio-hum" min="0" max="100" value="30">
+          </label>
+          <p class="demo__hint">플랩마다 균 코팅 두께가 달라 열리는 습도 문턱이 다릅니다. 문턱값은 코드가 아니라 <em>프린트 두께</em>에 저장됩니다.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 2-2 Morphing Pasta / Thermorph -->
+  <article class="case" id="sec-pasta">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/pasta.jpg" alt="나선형 파스타" loading="lazy">
+        <figcaption>참고 이미지: 일반 나선형 파스타. Morphing Pasta의 실제 사진과 영상은 <a href="https://morphingmatter.org/projects/morphing-pasta-and-beyond" target="_blank" rel="noopener">Morphing Matter Lab</a> 참조. Popo le Chien, CC BY-SA 3.0</figcaption>
+      </figure>
+      <figure class="figure figure--small">
+        <img src="img/fourd2.jpg" alt="4D 프린팅으로 만든 다형태 능동 복합재" loading="lazy">
+        <figcaption>4D 프린팅된 능동 복합재 · 열에 반응해 미리 설계된 형태로 변형. Wu et al., CC BY-SA 4.0</figcaption>
+      </figure>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">Morphing Pasta · Thermorph <span class="case__tag">CMU Morphing Matter Lab (Lining Yao), 2018–2021</span></h3>
+      <p>평평한 파스타 표면에 홈을 새기면 삶을 때 홈이 있는 면과 없는 면의 팽창 속도가 달라져 스스로 나선·튜브로 접힙니다(<i>Science Advances</i>, 2021).
+      Thermorph(CHI 2018)는 같은 원리를 데스크톱 3D프린터로: 수축하는 재료와 버티는 재료를 겹쳐 인쇄하면 뜨거운 물에서 정해진 각도로 접힙니다.
+      "접히는 순서와 각도"라는 프로그램이 <b>홈의 간격과 층 배치</b>에 인코딩됩니다. 인쇄 시간 86%, 재료 75% 절감.</p>
+      <div class="demo">
+        <div class="demo__stage">
+          <svg id="pasta" viewBox="0 0 400 220" class="svg-demo" aria-label="모핑 파스타 시뮬레이션"></svg>
+          <div class="demo__controls">
+            <label class="range">
+              <span>홈 간격 <output id="pasta-gap-out">중간</output></span>
+              <input type="range" id="pasta-gap" min="1" max="3" value="2" step="1">
+            </label>
+            <label class="range">
+              <span>삶는 시간 <output id="pasta-time-out">0</output>분</span>
+              <input type="range" id="pasta-time" min="0" max="10" value="0" step="0.1">
+            </label>
+          </div>
+          <p class="demo__hint">홈 간격이 좁을수록 더 강하게 휩니다. 결과 형태는 삶기 전에 이미 홈 패턴에 결정되어 있습니다.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 2-3 Jacquard / Foldio -->
+  <article class="case" id="sec-jacquard">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/textile.jpg" alt="전도성 실로 짠 텍스타일 센서" loading="lazy">
+        <figcaption>전도성 실을 직조에 섞어 만든 텍스타일 센서. Faktiva, CC BY-SA 4.0</figcaption>
+      </figure>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">Project Jacquard · Foldio <span class="case__tag">Google ATAP 2015 · Saarland Univ. UIST 2015</span></h3>
+      <p><b>Jacquard</b>는 전도성 합금 코어를 실크로 감싼 실을 만들어 일반 직기로 짤 수 있게 했습니다. 센서를 천에 "붙인" 게 아니라 <em>짜는 구조가 곧 정전용량 격자</em>입니다.
+      Levi's 재킷 소매를 쓸어 전화를 받는 제품으로 출시됐습니다.</p>
+      <p><b>Foldio</b>(Olberding, Steimle 외)는 잉크젯으로 종이에 회로를 인쇄한 뒤 접어 3D 물체를 만듭니다. 접힘 각도가 저항 변화로 읽히고, 접는 구조 자체가 입력·출력 표면이 됩니다.</p>
+      <div class="demo">
+        <div class="demo__stage">
+          <div class="weave" id="weave" aria-label="직조 격자 터치 데모"></div>
+          <p class="demo__hint">격자를 손가락이나 마우스로 쓸어보세요. 교차점이 곧 센서 셀입니다 · 씨실·날실 중 전도성 실만 표시됩니다.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 2-4 Radical Atoms / 4D printing -->
+  <article class="case" id="sec-radical">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/fourd.jpg" alt="4D 프린팅으로 스스로 접힌 우편함 형태 구조" loading="lazy">
+        <figcaption>4D 프린팅 · 평면으로 인쇄된 뒤 스스로 접혀 우편함 형태가 된 구조. CC BY 4.0</figcaption>
+      </figure>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">Radical Atoms · 4D Printing <span class="case__tag">Hiroshi Ishii (MIT) · Skylar Tibbits (MIT Self-Assembly Lab)</span></h3>
+      <p><b>Radical Atoms</b>(Ishii, 2012)는 비전 선언입니다: 모든 디지털 정보가 물리적 형태를 갖고, 재료가 픽셀처럼 재구성될 수 있는 미래.
+      inFORM 같은 shape display가 이 계보의 첫 단계이고, bioLogic처럼 재료 자체가 반응하는 "programmable materials"가 두 번째 흐름입니다.</p>
+      <p><b>4D Printing</b>(Tibbits, TED 2013)은 시간을 4번째 차원으로 봅니다. 물·열·빛을 받으면 정해진 형태로 변하도록 재료의 팽창 차이를 <em>기하학으로 프로그램</em>합니다. 코드가 아니라 재료 배치가 프로그램입니다.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ================================================================
+     3. 이론
+     ================================================================ -->
+<section class="section" id="theory">
+  <header class="section__head">
+    <h2 class="section__title">이론적 배경 : 왜 이걸 "계산"이라 부르는가</h2>
+  </header>
+
+  <div class="theory">
+    <article class="theory__item" id="sec-morph">
+      <h3>Morphological Computation <span class="muted">Pfeifer &amp; Bongard, <i>How the Body Shapes the Way We Think</i>, 2006</span></h3>
+      <p>로봇공학에서 나온 개념. 몸의 형태와 재질이 제어 계산의 일부를 "떠맡는다". McGeer의 수동 보행기가 대표 사례 · 제어기 없이 순수 구조가 균형을 계산합니다.
+      2012년 Hauser 등은 탄성 있는 몸체가 실제로 비선형 계산 능력을 갖는다는 수학적 기초를 제시했습니다.</p>
+    </article>
+
+    <article class="theory__item theory__item--demo" id="sec-reservoir">
+      <h3>Physical Reservoir Computing <span class="muted">Nakajima, Hauser 외, 2013–2015</span></h3>
+      <p>실리콘으로 만든 문어 다리 모델에 입력을 흘리고, 다리 여기저기의 변형만 읽어 선형 회귀로 출력을 학습합니다. 재료의 비선형 동역학이 신경망의 은닉층 역할을 합니다.
+      학습되는 건 마지막 읽기 가중치뿐이고, 계산은 재료가 합니다.</p>
+      <div class="demo">
+        <div class="demo__stage">
+          <canvas id="reservoir" width="600" height="220" aria-label="스프링 질량 저장소 시뮬레이션"></canvas>
+          <p class="demo__hint">왼쪽 노드를 드래그하면 입력 신호가 스프링 네트워크를 통과합니다. 오른쪽 그래프는 세 노드의 응답 · 같은 입력이 서로 다른 비선형 함수로 변환된 것입니다.</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="theory__item theory__item--demo" id="sec-logic">
+      <h3>Mechanical Logic / Metamaterials <span class="muted">Bertoldi (Harvard) 외, <i>Nature Communications</i> 2021 등</span></h3>
+      <p>격자 구조의 좌굴(buckling) 모드를 회로 연결과 대응시켜 AND/OR/NOT 게이트와 기계식 메모리를 만듭니다. 전자 없이 힘만으로 논리를 처리합니다.
+      쌍안정(bistable) 구조는 눌린 상태를 스스로 유지하므로 전원 없는 1비트 메모리입니다.</p>
+      <div class="demo">
+        <div class="demo__stage">
+          <svg id="logic" viewBox="0 0 400 180" class="svg-demo" aria-label="기계식 AND 게이트"></svg>
+          <div class="demo__controls">
+            <button class="btn" data-logic="a">입력 A 누르기</button>
+            <button class="btn" data-logic="b">입력 B 누르기</button>
+            <button class="btn btn--ghost" data-logic="reset">리셋</button>
+          </div>
+          <p class="demo__hint">두 입력이 모두 눌려야 출력 빔이 좌굴됩니다. 한 번 좌굴된 빔은 쌍안정이라 손을 떼도 상태가 유지됩니다 · 메모리.</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="theory__item" id="sec-pi">
+      <h3>Physical Intelligence <span class="muted">Metin Sitti, <i>Extreme Mechanics Letters</i>, 2021</span></h3>
+      <p>지능은 뇌의 계산 지능(CI)뿐 아니라 몸에 인코딩된 물리 지능(PI)으로도 구성된다는 프레임. 소형 로봇에서는 뇌를 넣을 공간이 없으므로 감지·구동·제어를 재료 특성으로 통합해야 합니다.
+      <span class="muted">(참고: 이전 대화에서 Advanced Materials로 언급했으나 확인 결과 Extreme Mechanics Letters 게재입니다.)</span></p>
+    </article>
+
+    <article class="theory__item" id="sec-composites">
+      <h3>Computational Composites · Material Programming <span class="muted">Vallgårda &amp; Redström, CHI 2007 · Vallgårda 외, NordiCHI 2016</span></h3>
+      <p>HCI 쪽에서 이 관점을 가장 명시적으로 세운 논문. 컴퓨터를 <em>다른 재료와 결합해야 비로소 표현되는 재료</em>로 보자고 제안(2007).
+      이어서 디자이너가 코드가 아니라 재료의 반응 특성 자체를 프로그래밍하는 실천을 "Material Programming"으로 명명(2016).
+      스터디 소개문의 "물성을 센싱과 계산 과정의 일부로 바라보는 연구"는 이 계보를 가리킵니다.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ================================================================
+     4. 트레이드오프
+     ================================================================ -->
+<section class="section" id="tradeoff">
+  <header class="section__head">
+    <h2 class="section__title">무엇을 재료로 내려보낼 것인가</h2>
+    <p class="section__lead">질문은 "소프트웨어를 없앨 수 있나"가 아니라 "어떤 계층의 계산을 재료로 내려보낼 것인가"입니다. 기능을 하나 고르고 각 조건을 켜보세요.</p>
+  </header>
+
+  <div class="tradeoff" id="sec-picker">
+    <div class="tradeoff__pick">
+      <p class="muted">대체하고 싶은 소프트웨어 기능</p>
+      <div class="chips" id="tradeoff-funcs"></div>
+    </div>
+    <div class="tradeoff__criteria" id="tradeoff-criteria"></div>
+    <div class="tradeoff__verdict" id="tradeoff-verdict"></div>
+  </div>
+
+  <div class="table-wrap" id="sec-table">
+    <table class="table">
+      <thead><tr><th></th><th>형태·재질이 잘하는 것</th><th>소프트웨어가 잘하는 것</th></tr></thead>
+      <tbody>
+        <tr><th>전원</th><td>불필요, 항상 켜져 있음</td><td>배터리·전원 필요</td></tr>
+        <tr><th>지연</th><td>0 (물리 법칙 속도)</td><td>샘플링·처리 지연</td></tr>
+        <tr><th>고장 모드</th><td>예측 가능, 점진적</td><td>갑작스러움, 불투명</td></tr>
+        <tr><th>변환 종류</th><td>아날로그·연속, 단일 함수</td><td>이산 논리, 조합, 분기</td></tr>
+        <tr><th>규칙 변경</th><td>물건을 다시 만들어야 함</td><td>업데이트 한 번</td></tr>
+        <tr><th>상태 공유</th><td>그 자리에만 존재</td><td>원격·다중 사용자 동기화</td></tr>
+        <tr><th>상태 인지</th><td>보고 만지면 앎(무음 스위치)</td><td>화면을 켜야 앎</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================
+     출처
+     ================================================================ -->
+<section class="section section--sources" id="sources">
+  <header class="section__head">
+    <h2 class="section__title">출처</h2>
+  </header>
+  <div class="sources">
+    <div>
+      <h3>연구·논문</h3>
+      <ul>
+        <li><a href="https://tangible.media.mit.edu/project/biologic/" target="_blank" rel="noopener">bioLogic · MIT Tangible Media Group</a> · <a href="https://www.dezeen.com/2015/11/04/mit-media-lab-tangible-media-group-biologic-material-bacteria-fashion-design/" target="_blank" rel="noopener">Dezeen 기사</a> · <a href="https://news.mit.edu/2016/living-breathing-textile-aims-to-enchance-athletic-performance-0216" target="_blank" rel="noopener">MIT News</a></li>
+        <li><a href="https://morphingmatter.org/projects/morphing-pasta-and-beyond" target="_blank" rel="noopener">Morphing Pasta · Morphing Matter Lab</a> · <a href="https://www.cmu.edu/news/stories/archives/2021/may/morphing-pasta.html" target="_blank" rel="noopener">CMU News</a></li>
+        <li><a href="https://morphingmatter.org/publications/thermorph" target="_blank" rel="noopener">Thermorph (CHI 2018)</a> · <a href="https://www.cmu.edu/news/stories/archives/2018/april/self-folding-materials.html" target="_blank" rel="noopener">CMU News</a></li>
+        <li><a href="http://www.ivanpoupyrev.com/wp-content/uploads/2017/01/p4216-poupyrev.pdf" target="_blank" rel="noopener">Project Jacquard: Interactive Digital Textiles at Scale (CHI 2016, PDF)</a></li>
+        <li><a href="https://hci.cs.uni-saarland.de/projects/foldio/" target="_blank" rel="noopener">Foldio · Saarland HCI Lab (UIST 2015)</a></li>
+        <li><a href="https://tangible.media.mit.edu/project/radical-atoms-exhibition-at-ars-electronica/" target="_blank" rel="noopener">Radical Atoms · Tangible Media Group</a> · <a href="https://ars.electronica.art/aeblog/en/2017/09/05/radicalatoms-rethinking-materials/" target="_blank" rel="noopener">Ars Electronica</a></li>
+        <li><a href="https://www.technologyreview.com/2024/08/27/1096638/skylar-tibbits-4-d-printing-materials-transformation/" target="_blank" rel="noopener">Skylar Tibbits, 4D Printing · MIT Technology Review</a></li>
+        <li><a href="https://journals.sagepub.com/doi/10.1177/027836499000900206" target="_blank" rel="noopener">McGeer, Passive Dynamic Walking (IJRR 1990)</a></li>
+        <li><a href="https://link.springer.com/article/10.1007/s00422-012-0471-0" target="_blank" rel="noopener">Hauser et al., Towards a theoretical foundation for morphological computation (2012)</a></li>
+        <li><a href="https://www.nature.com/articles/srep10487" target="_blank" rel="noopener">Nakajima et al., Information processing via physical soft body (Sci. Rep. 2015)</a></li>
+        <li><a href="https://www.nature.com/articles/s41467-021-21920-y" target="_blank" rel="noopener">Digital logic gates in soft, conductive mechanical metamaterials (Nat. Commun. 2021)</a></li>
+        <li><a href="https://www.boleideng.com/publication/PI_Sitti.pdf" target="_blank" rel="noopener">Sitti, Physical intelligence as a new paradigm (EML 2021, PDF)</a></li>
+        <li><a href="https://dl.acm.org/doi/10.1145/1240624.1240706" target="_blank" rel="noopener">Vallgårda &amp; Redström, Computational Composites (CHI 2007)</a> · <a href="https://dx.doi.org/10.1145/2971485.2971554" target="_blank" rel="noopener">Material Programming (NordiCHI 2016)</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>이미지</h3>
+      <p class="muted">모든 사진은 Wikimedia Commons의 자유 라이선스(CC0 / Public domain / CC BY / CC BY-SA) 이미지입니다. 각 캡션에 저작자와 라이선스를 표기했습니다. 연구 프로젝트의 실제 사진은 저작권 문제로 포함하지 않았으며, 위 링크에서 볼 수 있습니다.</p>
+      <ul id="credits-list"></ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>디자인 스터디 자료 · 2026-08-30 · 데모는 설명용 시뮬레이션이며 실제 물건은 코드 없이 같은 일을 합니다.</p>
+</footer>
+
+<script src="script.js?v=20"></script>
+</body>
+</html>

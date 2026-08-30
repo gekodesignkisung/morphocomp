@@ -1,0 +1,100 @@
+{
+ "walker": {
+  "file": "img/walker.gif",
+  "title": "Passive dynamic walker.gif",
+  "artist": "Stpedraz",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Passive_dynamic_walker.gif"
+ },
+ "usbc": {
+  "file": "img/usbc.png",
+  "title": "USB-C connector and receptacle.webp",
+  "artist": "Wikideas1",
+  "license": "CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:USB-C_connector_and_receptacle.webp"
+ },
+ "shuttlecock": {
+  "file": "img/shuttlecock.jpg",
+  "title": "Koogan badminton feather shuttlecock 01.JPG",
+  "artist": "Stanislas PERRIN",
+  "license": "Public domain",
+  "page": "https://commons.wikimedia.org/wiki/File:Koogan_badminton_feather_shuttlecock_01.JPG"
+ },
+ "keysort": {
+  "file": "img/keysort.jpg",
+  "title": "McBee-Keysort-cards-front-and-rear.jpg",
+  "artist": "Museum of Obsolete Media",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:McBee-Keysort-cards-front-and-rear.jpg"
+ },
+ "jacquard": {
+  "file": "img/jacquard.jpg",
+  "title": "A Jacquard loom showing information punchcards, National Museum of Scotland.jpg",
+  "artist": "Stephencdickson",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:A_Jacquard_loom_showing_information_punchcards,_National_Museum_of_Scotland.jpg"
+ },
+ "hourglass": {
+  "file": "img/hourglass.jpg",
+  "title": "Hourglass with sand.jpg",
+  "artist": "John Morgan",
+  "license": "CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Hourglass_with_sand.jpg"
+ },
+ "funnel": {
+  "file": "img/funnel.jpg",
+  "title": "Funnel MET DP234124.jpg",
+  "artist": "",
+  "license": "CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Funnel_MET_DP234124.jpg"
+ },
+ "zipper": {
+  "file": "img/zipper.jpg",
+  "title": "Plastic watertight drysuit zipper closed teeth detail P8110024.jpg",
+  "artist": "Peter Southwood",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Plastic_watertight_drysuit_zipper_closed_teeth_detail_P8110024.jpg"
+ },
+ "bimetal_photo": {
+  "file": "img/bimetal_photo.jpg",
+  "title": "Bimetallic strip from circuit breaker.JPG",
+  "artist": "Dmitry G",
+  "license": "CC BY-SA 3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Bimetallic_strip_from_circuit_breaker.JPG"
+ },
+ "natto": {
+  "file": "img/natto.png",
+  "title": "Bacillus subtilis natto colonies.png",
+  "artist": "Catfaster",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Bacillus_subtilis_natto_colonies.png"
+ },
+ "textile": {
+  "file": "img/textile.jpg",
+  "title": "Textile-sensor2.jpg",
+  "artist": "Faktiva",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Textile-sensor2.jpg"
+ },
+ "fourd": {
+  "file": "img/fourd.jpg",
+  "title": "3d folding structures mimicking the usps mailbox.jpg",
+  "artist": "Yiqi Mao, Kai Yu, Michael S. Isakov, Jiangtao Wu, Martin L. Dunn &amp; H. Jerry Qi",
+  "license": "CC BY 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:3d_folding_structures_mimicking_the_usps_mailbox.jpg"
+ },
+ "fourd2": {
+  "file": "img/fourd2.jpg",
+  "title": "Multishape active composites by 3d printing of digial smps.jpg",
+  "artist": "Jiangtao Wu, Chao Yuan, Zhen Ding, Michael Isakov, Yiqi Mao, Tiejun Wang, Martin L. Dunn &amp; H. Jerry Qi",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Multishape_active_composites_by_3d_printing_of_digial_smps.jpg"
+ },
+ "pasta": {
+  "file": "img/pasta.jpg",
+  "title": "Girandole.jpeg",
+  "artist": "Popo le Chien",
+  "license": "CC BY-SA 3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Girandole.jpeg"
+ }
+}
