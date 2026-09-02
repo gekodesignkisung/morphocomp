@@ -63,7 +63,7 @@
   (function topnav() {
     const links = $$('.topbar__nav a'); if (!links.length) return;
     const SUB = {
-      everyday: [['sec-bimetal', '바이메탈'], ['sec-usb', 'USB-C'], ['sec-shuttlecock', '셔틀콕·보행기'], ['sec-notched', '천공 카드'], ['sec-more', '지퍼·모래시계·깔때기']],
+      everyday: [['sec-funnel', '깔때기'], ['sec-bimetal', '바이메탈'], ['sec-usb', 'USB-C'], ['sec-shuttlecock', '셔틀콕·보행기'], ['sec-notched', '동전 분류기'], ['sec-more', '지퍼·모래시계']],
       research: [['sec-biologic', 'bioLogic'], ['sec-pasta', 'Morphing Pasta'], ['sec-jacquard', 'Jacquard·Foldio'], ['sec-radical', 'Radical Atoms·4D']],
       theory: [['sec-morph', 'Morphological'], ['sec-reservoir', 'Reservoir'], ['sec-logic', 'Mechanical Logic'], ['sec-pi', 'Physical Intelligence'], ['sec-composites', 'Material Programming']],
       tradeoff: [['sec-picker', '판정 도구'], ['sec-table', '비교표']],
@@ -92,9 +92,9 @@
       entries.forEach(en => { if (en.isIntersecting) { setActive(map.get(en.target.id)); renderSub(en.target.id); } });
     }, { rootMargin: '-60px 0px -70% 0px' });
     map.forEach((a, id) => { const el = document.getElementById(id); if (el) io.observe(el); });
-    // 도입부(깔때기)에서는 서브메뉴 숨김
-    const intro = document.getElementById('intro');
-    if (intro) new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting && performance.now() >= lockUntil) { setActive(null); renderSub(null); } }), { rootMargin: '-60px 0px -70% 0px' }).observe(intro);
+    // 최상단(마스트헤드)에서는 서브메뉴 숨김
+    const mast = $('.masthead');
+    if (mast) new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting && performance.now() >= lockUntil) { setActive(null); renderSub(null); } }), { rootMargin: '-60px 0px -70% 0px' }).observe(mast);
   })();
 
   /* ---------- 코드 / 재료 탭 ---------- */
@@ -169,8 +169,8 @@
       const lvl = Math.min(28, level);
       ctx.fillStyle = INK; ctx.fillRect(neckX - 39, H - 11 - lvl, 78, lvl);
       // 라벨
-      ctx.fillStyle = INK3; ctx.font = '12px monospace';
-      ctx.fillText('input: 어디든 (클릭·드래그)', 24, 40);
+      ctx.fillStyle = INK3; ctx.font = '16px monospace';
+      ctx.fillText('input: 어디든 (클릭·드래그)', 24, 42);
       ctx.fillText('output: 한 곳 (' + collected + ')', neckX + 50, H - 18);
       // 방울
       for (let i = drops.length - 1; i >= 0; i--) {
@@ -324,154 +324,311 @@
       for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(-26, i * 6); ctx.stroke(); } // 깃털 (뒤)
       if (uni.checked) { ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(-22, 0, 7, 0, Math.PI * 2); ctx.fill(); }
       ctx.restore();
-      ctx.fillStyle = INK3; ctx.font = '12px monospace';
+      ctx.fillStyle = INK3; ctx.font = '14px monospace';
       ctx.fillText(uni.checked ? '균일 형태: 복원 토크 없음' : '비대칭 형태: 코르크가 앞으로 정렬', 12, 20);
       requestAnimationFrame(draw);
     }
     draw();
   })();
 
-  /* ---------- 1-4 가장자리 천공 카드 ---------- */
-  (function cards() {
-    const box = $('#cards'); if (!box) return;
-    const TAGS = ['design', 'paper', 'sensor', 'textile', 'robot', 'food'];
-    const DATA = [
-      { t: 'bioLogic', tags: ['textile', 'sensor'] },
-      { t: 'Foldio', tags: ['paper', 'sensor', 'design'] },
-      { t: 'Morphing Pasta', tags: ['food', 'design'] },
-      { t: 'Jacquard', tags: ['textile', 'sensor', 'design'] },
-      { t: 'Passive Walker', tags: ['robot'] },
-      { t: 'Keysort Card', tags: ['paper', 'design'] },
-      { t: 'Octopus Reservoir', tags: ['robot', 'sensor'] },
+  /* ---------- 1-4 동전 분류기 ---------- */
+  (function sorter() {
+    const cv = $('#sorter'); if (!cv) return;
+    const ctx = cv.getContext('2d'); const W = cv.width, H = cv.height;
+    // 레일: 왼쪽에서 오른쪽으로 살짝 내리막. 구멍(슬롯)은 작은 것부터.
+    const railY = x => 70 + x * 0.06;
+    const slots = [
+      { x: 130, w: 22, label: '소' },
+      { x: 230, w: 30, label: '중' },
+      { x: 330, w: 40, label: '대' },
     ];
-    const active = new Set();
-    const chips = $('#card-tags');
-    TAGS.forEach(tag => {
-      const b = document.createElement('button'); b.className = 'chip'; b.textContent = tag;
-      b.addEventListener('click', () => { b.classList.toggle('is-active'); active.has(tag) ? active.delete(tag) : active.add(tag); renderRods(); });
-      chips.appendChild(b);
-    });
-    const els = DATA.map((d, i) => {
-      const c = document.createElement('div'); c.className = 'card';
-      c.style.setProperty('--r', (i - 3) * 2 + 'deg'); c.style.zIndex = i;
-      c.innerHTML = `<div class="card__holes">${TAGS.map(t => `<span class="card__hole ${d.tags.includes(t) ? 'is-notched' : ''}" data-tag="${t}"></span>`).join('')}</div>
-        <div class="card__title">${d.t}</div><div class="card__tags">${d.tags.join(' · ')}</div>`;
-      box.appendChild(c); return c;
-    });
-    function renderRods() { $$('.card__hole', box).forEach(h => h.classList.toggle('is-rod', active.has(h.dataset.tag))); }
-    $('#card-lift').addEventListener('click', () => {
-      Sound.click();
-      // 막대가 꽂힌 자리에 홈(notch)이 있으면 막대에 걸리지 않고 떨어진다.
-      // 막대가 하나도 없으면 아무것도 걸리지 않아 전부 떨어진다.
-      DATA.forEach((d, i) => {
-        const held = active.size > 0 && [...active].every(t => !d.tags.includes(t)); // 모든 막대 자리에 구멍이 온전해야 걸림
-        els[i].classList.toggle('is-dropped', !held);
+    const bins = slots.map(() => 0);
+    const coins = [];
+    const result = $('#sorter-result');
+    const SIZES = [16, 26, 34]; // 동전은 3종류: 소·중·대
+    function drop() {
+      const d = SIZES[Math.floor(Math.random() * 3)];
+      coins.push({ x: 18, d, y: railY(18) - d / 2, vy: 0, falling: false, slot: -1 });
+      Sound.tick();
+    }
+    $('#sorter-drop').addEventListener('click', drop);
+    $('#sorter-many').addEventListener('click', () => { let n = 0; const t = setInterval(() => { drop(); if (++n >= 10) clearInterval(t); }, 220); });
+    $('#sorter-reset').addEventListener('click', () => { coins.length = 0; bins.fill(0); result.textContent = '동전을 넣어 보세요. 소·중·대 세 종류가 무작위로 나옵니다.'; });
+    function step() {
+      ctx.clearRect(0, 0, W, H);
+      // 레일 (슬롯 구간은 끊김)
+      ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.beginPath();
+      let px = 8;
+      slots.forEach(sl => { ctx.moveTo(px, railY(px)); ctx.lineTo(sl.x - sl.w / 2, railY(sl.x - sl.w / 2)); px = sl.x + sl.w / 2; });
+      ctx.moveTo(px, railY(px)); ctx.lineTo(W - 8, railY(W - 8)); ctx.stroke();
+      // 슬롯 폭 표시와 통
+      ctx.font = '13px monospace'; ctx.textAlign = 'center';
+      slots.forEach((sl, i) => {
+        ctx.strokeStyle = INK3; ctx.lineWidth = 2;
+        ctx.strokeRect(sl.x - 34, H - 74, 68, 60);
+        ctx.fillStyle = INK3;
+        ctx.fillText(`구멍 ${sl.w}px`, sl.x, railY(sl.x) + 22);
+        ctx.fillText(`${sl.label} · ${bins[i]}개`, sl.x, H - 4);
+        // 통에 쌓인 동전
+        for (let k = 0; k < Math.min(bins[i], 12); k++) {
+          ctx.fillStyle = INK2; ctx.beginPath();
+          ctx.arc(sl.x - 20 + (k % 4) * 13, H - 22 - Math.floor(k / 4) * 13, 5.5, 0, Math.PI * 2); ctx.fill();
+        }
       });
-    });
-    $('#card-reset').addEventListener('click', () => els.forEach(e => e.classList.remove('is-dropped')));
+      ctx.fillStyle = INK3; ctx.textAlign = 'left';
+      ctx.fillText('구멍: 작은 순서 →', 10, 24);
+      // 동전
+      for (let i = coins.length - 1; i >= 0; i--) {
+        const c = coins[i];
+        if (!c.falling) {
+          c.x += 1.6; c.y = railY(c.x) - c.d / 2;
+          const sl = slots.findIndex(s2 => Math.abs(c.x - s2.x) < s2.w / 2 - 2 && c.d < s2.w);
+          if (sl >= 0) { c.falling = true; c.slot = sl; c.x = slots[sl].x; Sound.tick(); }
+          if (c.x > W - 12) { coins.splice(i, 1); continue; } // 어느 구멍보다 큰 동전은 끝으로
+        } else {
+          c.vy += 0.3; c.y += c.vy;
+          if (c.y > H - 40) {
+            bins[c.slot]++; coins.splice(i, 1);
+            Sound.drip(bins[c.slot] * 2);
+            result.textContent = `${slots[c.slot].label} 동전(지름 ${c.d}px)이 ${slots[c.slot].label} 통으로. 자기보다 큰 첫 구멍에서 떨어졌을 뿐입니다.`;
+            continue;
+          }
+        }
+        ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(c.x, c.y, c.d / 2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(c.x, c.y, c.d / 6, 0, Math.PI * 2); ctx.fill();
+      }
+      requestAnimationFrame(step);
+    }
+    step();
   })();
 
   /* ---------- 2-1 bioLogic ---------- */
   (function biologic() {
     const svg = $('#biologic'); if (!svg) return;
-    const slider = $('#bio-hum'), out = $('#bio-out');
+    const slider = $('#bio-hum'), out = $('#bio-out'), status = $('#bio-status'), runBtn = $('#bio-run');
     const NS = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs, parent = svg) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+    el('text', { x: 284, y: 18, 'text-anchor': 'middle', 'font-size': 12, 'font-family': 'monospace', fill: '#888' }).textContent = '운동복 등판 · bioLogic 프린트';
+    // 티셔츠 그룹 (오른쪽으로 이동)
+    const shirt = el('g', { transform: 'translate(34,0)' });
+    // 티셔츠 등판: 목선·어깨·소매가 있는 실루엣
+    el('path', {
+      d: 'M212 42 Q250 58 288 42 L332 54 L354 98 L320 112 L314 284 L186 284 L180 112 L146 98 L168 54 Z',
+      fill: '#fff', stroke: '#111', 'stroke-width': 2, 'stroke-linejoin': 'round'
+    }, shirt);
+    // 소매 절개선
+    el('path', { d: 'M180 112 L186 96 M320 112 L314 96', stroke: '#ccc', 'stroke-width': 1.5, fill: 'none' }, shirt);
+    // 코팅 두께 3단계: 명도 차이를 크게
+    const SHADES = ['#9a9a9a', '#555', '#111'];
+    const TIER_LABEL = ['얇은 코팅 · 일찍 열림', '중간 코팅', '두꺼운 코팅 · 늦게 열림'];
+    const TIER_THRESH = [42, 60, 78];
+    // 범례 (왼쪽 여백)
+    TIER_LABEL.forEach((label, i) => {
+      el('circle', { cx: 28, cy: 128 + i * 30, r: 8, fill: SHADES[i] });
+      el('text', { x: 44, y: 132 + i * 30, 'font-size': 11, 'font-family': 'monospace', fill: '#888' }).textContent = label;
+    });
+    // 원형 플랩(비늘): 등 중앙은 얇은 코팅, 가장자리로 갈수록 두꺼움
     const flaps = [];
-    // 4 x 3 플랩, 각각 문턱 습도가 다름(코팅 두께)
-    for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) {
-      const x = 40 + c * 68, y = 16 + r * 68;
-      const thresh = 25 + ((r * 5 + c) * 37) % 55; // 25~80 사이 분산
-      const base = document.createElementNS(NS, 'rect');
-      base.setAttribute('x', x); base.setAttribute('y', y); base.setAttribute('width', 52); base.setAttribute('height', 40); base.setAttribute('fill', '#fff'); base.setAttribute('stroke', LINE);
-      const flap = document.createElementNS(NS, 'path');
-      flap.setAttribute('fill', INK); flap.setAttribute('stroke', 'none');
-      const label = document.createElementNS(NS, 'text');
-      label.setAttribute('x', x + 26); label.setAttribute('y', y + 54); label.setAttribute('text-anchor', 'middle');
-      label.setAttribute('class', 'svg-label'); label.setAttribute('font-size', '9'); label.textContent = thresh + '%';
-      svg.append(base, flap, label);
-      flaps.push({ x, y, thresh, flap });
-    }
+    const rows = [[218, 250, 282], [234, 266], [218, 250, 282], [234, 266], [218, 250, 282]];
+    rows.forEach((xs, r) => xs.forEach(cx => {
+      const cy = 136 + r * 34, R = 13;
+      const centerDist = Math.hypot(cx - 250, cy - 200) / 60; // 0(중앙)~1.5(가장자리)
+      const tier = centerDist < 0.55 ? 0 : (centerDist < 1.05 ? 1 : 2);
+      const jitter = (r * 7 + cx) % 8;
+      const thresh = TIER_THRESH[tier] + jitter;
+      // 통기구멍 (플랩 아래)
+      el('circle', { cx, cy, r: R, fill: '#efefef', stroke: '#ccc' }, shirt);
+      const steam = el('g', { opacity: 0 }, shirt);
+      el('path', { d: `M${cx - 5} ${cy + 4} q3 -8 0 -15`, stroke: '#999', 'stroke-width': 1.5, fill: 'none' }, steam);
+      el('path', { d: `M${cx + 5} ${cy + 6} q3 -8 0 -15`, stroke: '#999', 'stroke-width': 1.5, fill: 'none' }, steam);
+      // 플랩: 닫히면 원, 열리면 위로 들리며 납작해짐 (비늘이 들리는 모습)
+      const flap = el('ellipse', { cx, cy, rx: R, ry: R, fill: SHADES[tier] }, shirt);
+      flaps.push({ cx, cy, R, thresh, flap, steam, open: false });
+    }));
+    let hum = +slider.value;
     function render() {
-      const h = +slider.value; out.value = h;
+      const h = hum; slider.value = Math.round(h); out.value = Math.round(h);
+      let openCount = 0;
       flaps.forEach(f => {
-        // 문턱 이후 습도에 비례해 휘어 올라감 (재료의 연속 응답)
-        const k = Math.max(0, Math.min(1, (h - f.thresh) / 25));
-        // 위쪽 변이 경첩: 아래쪽 자유단이 들려 올라가며 통기구(흰 부분)가 드러난다
-        const lift = k * 30;
-        f.flap.setAttribute('d', `M${f.x} ${f.y} L${f.x + 52} ${f.y} L${f.x + 52} ${f.y + 40 - lift * 0.4} Q${f.x + 26} ${f.y + 40 - lift} ${f.x} ${f.y + 40 - lift * 0.4} Z`);
-        f.flap.setAttribute('fill', k > 0 ? INK2 : INK);
+        const k = Math.max(0, Math.min(1, (h - f.thresh) / 16));
+        const isOpen = k > 0.15;
+        if (isOpen !== f.open) { f.open = isOpen; Sound.tone({ freq: isOpen ? 520 + f.thresh * 3 : 260, dur: 0.07, gain: 0.05 }); }
+        if (isOpen) openCount++;
+        f.flap.setAttribute('cy', f.cy - k * 11);       // 위로 들리고
+        f.flap.setAttribute('ry', f.R * (1 - k * 0.62)); // 납작해진다
+        f.steam.setAttribute('opacity', k > 0.3 ? Math.min(1, k) : 0);
       });
+      status.textContent = `플랩 ${openCount}/${flaps.length} 열림 ${openCount ? '· 땀이 증발하며 식는 중' : '· 보온 중'}`;
     }
-    slider.addEventListener('input', render); render();
+    slider.addEventListener('input', () => { hum = +slider.value; render(); }); render();
+    let running = false, raf;
+    function tick() {
+      hum += running ? 0.35 : -0.45;
+      hum = Math.max(30, Math.min(95, hum));
+      render();
+      if (running || hum > 30) raf = requestAnimationFrame(tick); else raf = null;
+    }
+    runBtn.addEventListener('click', () => {
+      running = !running;
+      runBtn.textContent = running ? '멈추기' : '달리기 시작';
+      Sound.click();
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
   })();
 
   /* ---------- 2-2 파스타 ---------- */
   (function pasta() {
     const svg = $('#pasta'); if (!svg) return;
-    const gap = $('#pasta-gap'), time = $('#pasta-time');
-    const gapOut = $('#pasta-gap-out'), timeOut = $('#pasta-time-out');
+    const time = $('#pasta-time');
+    const timeOut = $('#pasta-time-out');
+    let gapVal = 2;
     const NS = 'http://www.w3.org/2000/svg';
-    const body = document.createElementNS(NS, 'path'); body.setAttribute('fill', '#fff'); body.setAttribute('stroke', INK); body.setAttribute('stroke-width', 2);
-    const grooves = document.createElementNS(NS, 'g');
-    const label = document.createElementNS(NS, 'text'); label.setAttribute('x', 12); label.setAttribute('y', 20); label.setAttribute('class', 'svg-label');
-    svg.append(body, grooves, label);
-    function render() {
-      const g = +gap.value, t = +time.value;
-      gapOut.value = ['', '좁게', '중간', '넓게'][g]; timeOut.value = t.toFixed(1);
-      const stiffness = [0, 1.4, 1, 0.6][g];       // 홈이 촘촘할수록 더 휨
-      const curl = Math.min(1, t / 8) * stiffness; // 0..1.4
-      // 스트립을 N개 세그먼트로 나눠 곡률을 누적
-      const N = 40, L = 300, thick = 14;
-      let x = 50, y = 110, ang = 0; const pts = [];
+    svg.setAttribute('viewBox', '0 0 400 270');
+    const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; };
+    const label = mk('text', { x: 12, y: 22, class: 'svg-label' });
+    // 단면 다이어그램 (우상단): 홈이 파인 면과 매끈한 면
+    const inset = mk('g', {});
+    const insetLabel = mk('text', { x: 342, y: 22, 'text-anchor': 'middle', 'font-size': 10, 'font-family': 'monospace', fill: '#888' });
+    insetLabel.textContent = '단면: 아래쪽에 홈';
+    const body = mk('path', { fill: '#fff', stroke: '#111', 'stroke-width': 2 });
+    const grooves = mk('g', {});
+    let lastTone = 0, wasTube = false;
+    function render(fromUser) {
+      const g = gapVal, t = +time.value;
+      timeOut.value = t.toFixed(1);
+      const stiffness = [0, 1.5, 1.05, 0.62][g];    // 홈이 촘촘할수록 더 말림
+      const curl = Math.min(1, t / 8) * stiffness;
+      // 단면 다이어그램: 홈 간격 반영
+      inset.innerHTML = '';
+      const ix = 300, iy = 32, iw = 84, ih = 16, step = [0, 7, 12, 20][g];
+      const sec = document.createElementNS(NS, 'path');
+      let d = `M${ix} ${iy} L${ix} ${iy + ih}`;
+      for (let x = 0; x < iw; x += step) d += ` L${ix + x} ${iy + ih} l3 -6 l3 6`;
+      d += ` L${ix + iw} ${iy + ih} L${ix + iw} ${iy} Z`;
+      sec.setAttribute('d', d); sec.setAttribute('fill', '#e6e6e6'); sec.setAttribute('stroke', '#111'); sec.setAttribute('stroke-width', 1.5);
+      inset.appendChild(sec);
+      // 스트립: 홈 있는 면(위)이 덜 팽창 → 홈 쪽으로 말려 튜브가 된다 (아래로 말리게 그림)
+      const N = 44, L = 250, thick = 13;
+      let x = 78, y = 84, ang = 0; const pts = [];
       for (let i = 0; i <= N; i++) {
         pts.push({ x, y, ang });
-        ang -= curl * 0.06; x += Math.cos(ang) * (L / N); y += Math.sin(ang) * (L / N);
+        ang += curl * 0.062; x += Math.cos(ang) * (L / N); y += Math.sin(ang) * (L / N);
       }
       const top = pts.map(p => `${p.x + Math.sin(p.ang) * thick / 2},${p.y - Math.cos(p.ang) * thick / 2}`);
       const bot = pts.map(p => `${p.x - Math.sin(p.ang) * thick / 2},${p.y + Math.cos(p.ang) * thick / 2}`).reverse();
       body.setAttribute('d', 'M' + top.join(' L') + ' L' + bot.join(' L') + ' Z');
       grooves.innerHTML = '';
-      const step = [0, 2, 4, 7][g];
-      for (let i = 1; i < N; i += step) {
+      const gs = [0, 2, 4, 7][g];
+      for (let i = 1; i < N; i += gs) {
         const p = pts[i];
         const l = document.createElementNS(NS, 'line');
-        l.setAttribute('x1', p.x + Math.sin(p.ang) * thick / 2); l.setAttribute('y1', p.y - Math.cos(p.ang) * thick / 2);
-        l.setAttribute('x2', p.x + Math.sin(p.ang) * thick / 6); l.setAttribute('y2', p.y - Math.cos(p.ang) * thick / 6);
-        l.setAttribute('stroke', INK); l.setAttribute('stroke-width', 2);
+        // 홈은 곡선 안쪽(덜 팽창하는 면)
+        l.setAttribute('x1', p.x - Math.sin(p.ang) * thick / 2); l.setAttribute('y1', p.y + Math.cos(p.ang) * thick / 2);
+        l.setAttribute('x2', p.x - Math.sin(p.ang) * thick / 6); l.setAttribute('y2', p.y + Math.cos(p.ang) * thick / 6);
+        l.setAttribute('stroke', '#111'); l.setAttribute('stroke-width', 2);
         grooves.appendChild(l);
       }
-      label.textContent = t === 0 ? '건조 상태: 평평 · 형태는 이미 홈에 저장됨' : `홈 있는 면이 덜 팽창 → 그쪽으로 휨 (곡률 ${curl.toFixed(2)})`;
+      const isTube = curl > 1.2;
+      label.textContent = t === 0
+        ? '건조 상태: 평평 · 형태는 이미 홈에 저장됨'
+        : (isTube ? '홈 쪽으로 말려 튜브가 됨' : '홈 있는 면이 덜 팽창 → 홈 쪽으로 휨') + ` (곡률 ${curl.toFixed(2)})`;
+      if (fromUser) {
+        // 말릴수록 높아지는 삐걱임 (연속 조작 시 70ms 간격)
+        const now = performance.now();
+        if (now - lastTone > 70) { lastTone = now; Sound.tone({ freq: 180 + curl * 260, to: 160 + curl * 240, dur: 0.07, type: 'triangle', gain: 0.05 }); }
+        if (isTube !== wasTube) Sound.click(); // 튜브로 완성/풀림 순간
+      }
+      wasTube = isTube;
     }
-    gap.addEventListener('input', render); time.addEventListener('input', render); render();
+    // 홈 간격: 선택 메뉴. 간격이 좁을수록 촘촘한 틱이 빠르게 (홈 밀도가 소리 리듬으로)
+    const gapChips = $$('[data-gap]');
+    gapChips.forEach(b => b.addEventListener('click', () => {
+      gapVal = +b.dataset.gap;
+      gapChips.forEach(c => c.classList.toggle('is-active', c === b));
+      render(true);
+      const n = [0, 6, 4, 2][gapVal], iv = [0, 45, 90, 180][gapVal];
+      for (let i = 0; i < n; i++) setTimeout(() => Sound.tone({ freq: 900, dur: 0.025, gain: 0.05 }), i * iv);
+    }));
+    time.addEventListener('input', () => render(true)); render(false);
   })();
 
-  /* ---------- 2-3 직조 격자 ---------- */
+  /* ---------- 2-3 직조 격자 (재킷 소매 스와이프) ---------- */
   (function weave() {
     const box = $('#weave'); if (!box) return;
+    const track = $('#jacq-track'), action = $('#jacq-action');
     const N = 16; const cells = [];
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
       const d = document.createElement('div'); d.className = 'weave__cell';
-      if (r % 3 === 1 && c % 3 === 1) d.classList.add('is-cond'); // 전도성 실 교차점만 센서
+      if (r % 3 === 1) d.classList.add('is-cond-h'); // 전도성 씨실
+      if (c % 3 === 1) d.classList.add('is-cond-v'); // 전도성 날실
       box.appendChild(d); cells.push(d);
     }
-    function touch(e) {
-      const p = e.touches ? e.touches[0] : e;
-      const el = document.elementFromPoint(p.clientX, p.clientY);
-      if (!el || !el.classList.contains('weave__cell')) return;
-      const i = cells.indexOf(el); const r = Math.floor(i / N), c = i % N;
-      // 가장 가까운 전도성 교차점이 반응한다 (해상도 = 전도성 실 간격)
+    let trackNo = 3, playing = false;
+    let down = false, startCol = null, lastCol = null, lastTick = 0;
+    // 실제 재생: 트랙마다 다른 멜로디 루프 (Web Audio 합성, 파일 없음)
+    const SCALE = [220, 247, 277, 330, 370, 440, 494, 554, 660]; // A 펜타토닉 확장
+    const SONGS = [
+      { steps: [0, 2, 4, 2, 5, 4, 2, 0], bpm: 96, type: 'sine' },
+      { steps: [4, 4, 7, 5, 4, 2, 0, 2], bpm: 120, type: 'triangle' },
+      { steps: [0, 3, 5, 8, 5, 3, 5, 0], bpm: 84, type: 'sine' },
+      { steps: [7, 5, 4, 5, 7, 8, 7, 4], bpm: 132, type: 'triangle' },
+      { steps: [0, 4, 0, 5, 0, 4, 2, 2], bpm: 108, type: 'square' },
+    ];
+    let seqTimer = null, stepIdx = 0;
+    function startSong() {
+      stopSong();
+      const song = SONGS[(trackNo - 1) % SONGS.length];
+      stepIdx = 0;
+      seqTimer = setInterval(() => {
+        const n = song.steps[stepIdx % song.steps.length];
+        Sound.tone({ freq: SCALE[n], dur: 0.16, type: song.type, gain: 0.06 });
+        if (stepIdx % 2 === 0) Sound.tone({ freq: SCALE[n] / 2, dur: 0.2, type: 'sine', gain: 0.03 }); // 베이스
+        stepIdx++;
+      }, 60000 / song.bpm / 2);
+    }
+    function stopSong() { if (seqTimer) { clearInterval(seqTimer); seqTimer = null; } }
+    function syncSong() { playing ? startSong() : stopSong(); }
+    function cellAt(e) {
+      const el2 = document.elementFromPoint(e.clientX, e.clientY);
+      if (!el2 || !el2.classList.contains('weave__cell')) return null;
+      const i = cells.indexOf(el2); return { r: Math.floor(i / N), c: i % N };
+    }
+    function glow(rc) {
       cells.forEach((cell, j) => {
-        if (!cell.classList.contains('is-cond')) return;
         const rr = Math.floor(j / N), cc = j % N;
-        const dist = Math.hypot(rr - r, cc - c);
-        cell.classList.remove('is-hot', 'is-warm');
-        if (dist < 1.6) cell.classList.add('is-hot'); else if (dist < 3.2) cell.classList.add('is-warm');
+        const cond = cell.classList.contains('is-cond-h') || cell.classList.contains('is-cond-v');
+        const dist = Math.hypot(rr - rc.r, cc - rc.c);
+        cell.classList.toggle('is-hot', cond && dist < 1.8);
+        cell.classList.toggle('is-warm', cond && dist >= 1.8 && dist < 3.4);
       });
     }
-    let down = false;
-    box.addEventListener('pointerdown', e => { down = true; touch(e); });
-    box.addEventListener('pointermove', e => { if (down) touch(e); });
-    window.addEventListener('pointerup', () => { down = false; cells.forEach(c => c.classList.remove('is-hot', 'is-warm')); });
+    function clearGlow() { cells.forEach(c => c.classList.remove('is-hot', 'is-warm')); }
+    function setAction(text) { action.textContent = text; }
+    box.addEventListener('pointerdown', e => {
+      e.preventDefault(); down = true;
+      const rc = cellAt(e); if (rc) { startCol = lastCol = rc.c; glow(rc); }
+    });
+    box.addEventListener('pointermove', e => {
+      if (!down) return;
+      const rc = cellAt(e); if (!rc) return;
+      glow(rc);
+      if (rc.c !== lastCol) {
+        lastCol = rc.c;
+        const now = performance.now();
+        if (now - lastTick > 50) { lastTick = now; Sound.tick(); } // 교차점을 지날 때마다 틱
+      }
+    });
+    window.addEventListener('pointerup', () => {
+      if (!down) return; down = false; clearGlow();
+      if (startCol === null || lastCol === null) return;
+      const dx = lastCol - startCol;
+      if (dx >= 3) { trackNo++; playing = true; setAction('→ 다음 곡'); Sound.click(); }
+      else if (dx <= -3) { trackNo = Math.max(1, trackNo - 1); playing = true; setAction('← 이전 곡'); Sound.click(); }
+      else { playing = !playing; setAction(playing ? '▶ 재생' : '⏸ 일시정지'); Sound.click(); }
+      syncSong();
+      track.textContent = `Track ${trackNo}` + (playing ? ' ♪' : ' (정지)');
+      startCol = lastCol = null;
+    });
   })();
 
   /* ---------- 3. 저장소 계산 ---------- */
@@ -514,7 +671,7 @@
       ctx.strokeStyle = INK3; ctx.lineWidth = 1;
       springs.forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke(); });
       nodes.forEach((n, i) => { ctx.fillStyle = i === 0 ? INK : (readouts.includes(i) ? INK2 : '#bbb'); ctx.beginPath(); ctx.arc(n.x, n.y, i === 0 ? 8 : 5, 0, Math.PI * 2); ctx.fill(); });
-      ctx.fillStyle = INK3; ctx.font = '11px monospace'; ctx.fillText('input (drag)', 14, 24); ctx.fillText('readouts', 200, 24);
+      ctx.fillStyle = INK3; ctx.font = '13px monospace'; ctx.fillText('input (drag)', 14, 24); ctx.fillText('readouts', 200, 24);
       // 그래프
       const gx = 340, gw = 240;
       const plot = (arr, y0, col) => { ctx.strokeStyle = col; ctx.beginPath(); arr.forEach((v, i) => { const x = gx + i / 200 * gw, y = y0 - v * 0.4; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); };

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Morphocomp · 형태가 계산한다</title>
-<link rel="stylesheet" href="style.css?v=29">
+<link rel="stylesheet" href="style.css?v=42">
 </head>
 <body>
 
@@ -37,20 +37,7 @@
 <!-- ================================================================
      0. 깔때기: 도입 인터랙션
      ================================================================ -->
-<section class="section section--intro" id="intro">
-  <div class="demo demo--full">
-    <div class="demo__stage">
-      <canvas id="funnel" width="720" height="360" aria-label="깔때기 시뮬레이션"></canvas>
-      <p class="demo__hint">캔버스 위쪽 아무 곳이나 클릭하거나 드래그해서 물방울을 떨어뜨려 보세요.</p>
-    </div>
-    <div class="demo__text">
-      <h2 class="demo__title">깔때기는 "어디로 모을지"를 계산하지 않는다</h2>
-      <p>어디에 떨어뜨리든 결과는 하나의 출구입니다. 입력의 위치 정보는 형태에 의해 버려지고, 출력은 항상 같습니다.
-      소프트웨어로 쓰면 <code>x = center</code> 한 줄이지만, 깔때기는 그 한 줄을 전원 없이, 지연 없이, 고장 없이 실행합니다.</p>
-      <p class="demo__note">이 페이지의 모든 데모는 물성을 <em>설명하기 위한</em> 시뮬레이션입니다. 실제 물건은 이 코드 없이 같은 일을 합니다. 그 차이가 이 주제의 핵심입니다.</p>
-    </div>
-  </div>
-</section>
+
 
 <!-- ================================================================
      1. 일상의 사례
@@ -60,6 +47,28 @@
     <h2 class="section__title">일상의 사례 : 이미 형태가 소프트웨어를 대신하고 있다</h2>
     <p class="section__lead">각 카드의 <b>코드 / 재료</b> 토글을 눌러 같은 기능을 두 방식으로 비교해 보세요.</p>
   </header>
+
+  <!-- 1-0 깔때기 -->
+  <article class="case" id="sec-funnel">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/funnel.jpg" alt="유리 깔때기" loading="lazy">
+        <figcaption>입력의 위치 정보를 버리고 출력을 한 곳으로 정규화한다. Metropolitan Museum, CC0</figcaption>
+      </figure>
+      <p class="demo__note">이 페이지의 모든 데모는 물성을 <em>설명하기 위한</em> 시뮬레이션입니다. 실제 물건은 이 코드 없이 같은 일을 합니다. 그 차이가 이 주제의 핵심입니다.</p>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">깔때기 <span class="case__tag">"어디로 모을지"를 계산하지 않는다</span></h3>
+      <p>어디에 떨어뜨리든 결과는 하나의 출구입니다. 입력의 위치 정보는 형태에 의해 버려지고, 출력은 항상 같습니다.
+      소프트웨어로 쓰면 <code>x = center</code> 한 줄이지만, 깔때기는 그 한 줄을 전원 없이, 지연 없이, 고장 없이 실행합니다.</p>
+      <div class="demo">
+        <div class="demo__stage">
+          <canvas id="funnel" width="720" height="360" aria-label="깔때기 시뮬레이션"></canvas>
+          <p class="demo__hint">캔버스 위쪽 아무 곳이나 클릭하거나 드래그해서 물방울을 떨어뜨려 보세요.</p>
+        </div>
+      </div>
+    </div>
+  </article>
 
   <!-- 1-1 바이메탈 -->
   <article class="case" id="sec-bimetal">
@@ -232,8 +241,8 @@
 // 실제 USB-A는 이 조건문을
 // 사용자의 손에 맡겼다</code></pre>
           <div class="compare__panel" id="usb-mat">
-            <p>대칭 형태는 <code>orientation</code> 변수를 정의역에서 제거합니다. 조건문이 없는 게 아니라, <b>조건이 참이 될 수 있는 입력이 존재하지 않습니다</b>.</p>
-            <p class="muted">자동차 열쇠홈, 레고 브릭, 콘센트 극성도 같은 원리입니다.</p>
+            <p>USB-A는 뒤집힌 플러그를 "거부"합니다. USB-C는 위아래를 똑같이 만들어 <b>"뒤집힌 방향"이라는 상태 자체를 없앴습니다</b>. 에러를 잘 처리한 게 아니라, 에러가 일어날 자리를 형태가 지운 것입니다.</p>
+            <p class="muted">3.5mm 이어폰 플러그(원형 대칭), 무극성 220V 플러그, 양면 자동차 키도 같은 원리입니다. 반대로 구형 열쇠·HDMI·SIM 카드의 모서리 컷은 USB-A처럼 잘못된 방향을 형태로 거부하는 쪽입니다.</p>
           </div>
         </div>
       </div>
@@ -290,7 +299,7 @@
     <div class="case__media">
       <figure class="figure">
         <img src="img/keysort.jpg" alt="McBee Keysort 가장자리 천공 카드 앞뒤" loading="lazy">
-        <figcaption>McBee Keysort 가장자리 천공 카드(1950–60년대). Museum of Obsolete Media, CC BY-SA 4.0</figcaption>
+        <figcaption>같은 원리의 데이터 버전: 가장자리 천공 카드(1950–60년대). 태그 자리를 홈으로 잘라두면, 막대를 꽂아 들어올릴 때 홈 난 카드만 떨어진다. 검색을 중력이 실행했다. Museum of Obsolete Media, CC BY-SA 4.0</figcaption>
       </figure>
       <figure class="figure figure--small">
         <img src="img/jacquard.jpg" alt="천공 카드로 패턴을 제어하는 자카드 직기" loading="lazy">
@@ -298,19 +307,19 @@
       </figure>
     </div>
     <div class="case__body">
-      <h3 class="case__title">가장자리 천공 카드 <span class="case__tag">필터 쿼리를 종이 형태가 실행</span></h3>
-      <p>컴퓨터 이전 시대의 데이터베이스. 카드 가장자리 구멍을 태그 자리로 쓰고, 해당 태그가 있으면 구멍을 잘라 홈(notch)으로 만듭니다.
-      막대를 꽂고 들어올리면 홈이 난 카드만 떨어집니다. <code>WHERE tag = X</code>가 중력과 종이 형태로 실행됩니다.
-      막대를 두 개 꽂으면 AND, 두 번 나눠 하면 OR입니다.</p>
+      <h3 class="case__title">동전 분류기 <span class="case__tag">측정 · 분기 · 분류를 구멍 크기의 배치가 실행</span></h3>
+      <p>저금통 분류기는 동전을 레일에 굴립니다. 레일에는 구멍이 작은 것부터 큰 것 순서로 나 있고,
+      동전은 자기 지름보다 큰 첫 구멍에서 떨어집니다. 지름을 "재는" 센서도, 어느 통인지 "판단하는" 코드도 없습니다.
+      구멍의 오름차순 배치 자체가 정렬된 if-else 사다리입니다.</p>
 
       <div class="demo">
         <div class="demo__stage">
-          <div class="cards" id="cards"></div>
+          <canvas id="sorter" width="440" height="240" aria-label="동전 분류기 시뮬레이션"></canvas>
+          <p class="cards-result" id="sorter-result">동전을 넣어 보세요. 소·중·대 세 종류가 무작위로 나옵니다.</p>
           <div class="demo__controls">
-            <span class="muted">막대를 꽂을 위치(태그):</span>
-            <div class="chips" id="card-tags"></div>
-            <button class="btn" id="card-lift">막대 들어올리기</button>
-            <button class="btn btn--ghost" id="card-reset">다시 모으기</button>
+            <button class="btn" id="sorter-drop">동전 넣기</button>
+            <button class="btn btn--ghost" id="sorter-many">10개 연속</button>
+            <button class="btn btn--ghost" id="sorter-reset">비우기</button>
           </div>
         </div>
         <div class="compare">
@@ -318,13 +327,15 @@
             <button class="compare__tab is-active" data-target="card-code">코드</button>
             <button class="compare__tab" data-target="card-mat">재료</button>
           </div>
-          <pre class="compare__panel is-active" id="card-code"><code>SELECT * FROM cards
-WHERE 'design' IN tags
-  AND 'paper' IN tags;
--- 인덱스, 스토리지, 쿼리 엔진 필요</code></pre>
+          <pre class="compare__panel is-active" id="card-code"><code>for coin in coins:
+  d = measure(coin)      // 지름 센서
+  if d &lt; 20:  bin = A    // 분기
+  elif d &lt; 28: bin = B
+  else:        bin = C
+  arm.move(coin, bin)    // 분류 액추에이터</code></pre>
           <div class="compare__panel" id="card-mat">
-            <p>인덱스 = 구멍의 위치. 쿼리 = 막대의 위치. 실행 = 중력. 결과는 손에 남은 카드와 바닥에 떨어진 카드로 <b>물리적으로 분리</b>됩니다.</p>
-            <p class="muted">이 방식이 오늘 스터디의 "대신할 수 있는 사례"로 실제 제작하기 가장 쉬운 후보입니다.</p>
+            <p><b>측정</b> = 구멍을 통과하는가 못 하는가<br><b>분기</b> = 구멍이 작은 순서로 놓인 배치<br><b>분류</b> = 중력</p>
+            <p class="muted">왼쪽 사진의 가장자리 천공 카드는 같은 원리로 <b>검색</b>을 실행한 컴퓨터 이전의 데이터베이스입니다.</p>
           </div>
         </div>
       </div>
@@ -335,17 +346,23 @@ WHERE 'design' IN tags
   <div class="grid" id="sec-more">
     <figure class="figure figure--card">
       <img src="img/zipper.jpg" alt="지퍼 이빨 근접" loading="lazy">
-      <figcaption><b>지퍼</b> · 한 번의 직선 운동을 수십 개의 맞물림으로 순차 변환. 슬라이더의 Y자 통로가 "루프"입니다. Peter Southwood, CC BY-SA 4.0</figcaption>
+      <figcaption>
+        <b>지퍼</b> <span class="muted">직렬화를 형태가 실행</span>
+        <p>수십 개의 이빨을 하나씩 맞물리는 일은 원래 순차 처리 문제입니다. 지퍼는 슬라이더 안의 Y자 통로가 이 반복문을 대신합니다.
+        손잡이를 한 번 당기는 직선 운동이 통로를 지나는 동안 "다음 이빨을 맞물려라"가 자동으로 반복됩니다.
+        루프 변수도 종료 조건도 없이, 통로의 기울기가 곧 알고리즘입니다.</p>
+      </figcaption>
     </figure>
     <figure class="figure figure--card">
       <img src="img/hourglass.jpg" alt="모래시계" loading="lazy">
-      <figcaption><b>모래시계</b> · 타이머 앱의 <code>setTimeout</code>. 목의 지름과 모래 양이 상수입니다. John Morgan, CC BY 2.0</figcaption>
+      <figcaption>
+        <b>모래시계</b> <span class="muted">타이머를 형태가 실행</span>
+        <p>타이머 앱은 클록을 세고 비교하고 알림을 울립니다. 모래시계는 목의 지름과 모래 양이라는 두 상수에 시간을 저장합니다.
+        전원이 꺼질 일도, 알림 권한도 없습니다. 남은 시간이 모래 높이로 항상 보이므로 "확인하러 화면을 켜는" 단계 자체가 없고,
+        뒤집기 한 번이 리셋 버튼입니다.</p>
+      </figcaption>
     </figure>
-    <figure class="figure figure--card">
-      <img src="img/funnel.jpg" alt="깔때기" loading="lazy">
-      <figcaption><b>깔때기</b> · 입력의 위치 정보를 버리고 출력을 하나로 정규화. Metropolitan Museum, CC0</figcaption>
-    </figure>
-  </div>
+    </div>
 </section>
 
 <!-- ================================================================
@@ -372,12 +389,16 @@ WHERE 'design' IN tags
       New Balance, RCA와 협업해 운동복으로 만들어졌습니다.</p>
       <div class="demo">
         <div class="demo__stage">
-          <svg id="biologic" viewBox="0 0 400 220" class="svg-demo" aria-label="bioLogic 플랩 시뮬레이션"></svg>
-          <label class="range">
-            <span>피부 습도 <output id="bio-out">30</output>%</span>
-            <input type="range" id="bio-hum" min="0" max="100" value="30">
-          </label>
-          <p class="demo__hint">플랩마다 균 코팅 두께가 달라 열리는 습도 문턱이 다릅니다. 문턱값은 코드가 아니라 <em>프린트 두께</em>에 저장됩니다.</p>
+          <svg id="biologic" viewBox="0 0 440 300" class="svg-demo" aria-label="bioLogic 통기 플랩 시뮬레이션"></svg>
+          <p class="cards-result" id="bio-status">플랩 0/12 열림</p>
+          <div class="demo__controls">
+            <button class="btn" id="bio-run">달리기 시작</button>
+            <label class="range" style="margin-top:0">
+              <span>피부 습도 <output id="bio-out">30</output>%</span>
+              <input type="range" id="bio-hum" min="0" max="100" value="30">
+            </label>
+          </div>
+          <p class="demo__hint">어두운 플랩일수록 균 코팅이 두꺼워 더 높은 습도에서 열립니다. 문턱값은 코드가 아니라 <em>프린트 두께</em>에 저장됩니다.</p>
         </div>
       </div>
     </div>
@@ -404,10 +425,12 @@ WHERE 'design' IN tags
         <div class="demo__stage">
           <svg id="pasta" viewBox="0 0 400 220" class="svg-demo" aria-label="모핑 파스타 시뮬레이션"></svg>
           <div class="demo__controls">
-            <label class="range">
-              <span>홈 간격 <output id="pasta-gap-out">중간</output></span>
-              <input type="range" id="pasta-gap" min="1" max="3" value="2" step="1">
-            </label>
+            <div class="seg" role="group" aria-label="홈 간격">
+              <span class="muted">홈 간격:</span>
+              <button class="chip" data-gap="1">좁게</button>
+              <button class="chip is-active" data-gap="2">중간</button>
+              <button class="chip" data-gap="3">넓게</button>
+            </div>
             <label class="range">
               <span>삶는 시간 <output id="pasta-time-out">0</output>분</span>
               <input type="range" id="pasta-time" min="0" max="10" value="0" step="0.1">
@@ -434,10 +457,23 @@ WHERE 'design' IN tags
       <p><b>Foldio</b>(Olberding, Steimle 외)는 잉크젯으로 종이에 회로를 인쇄한 뒤 접어 3D 물체를 만듭니다. 접힘 각도가 저항 변화로 읽히고, 접는 구조 자체가 입력·출력 표면이 됩니다.</p>
       <div class="demo">
         <div class="demo__stage">
-          <div class="weave" id="weave" aria-label="직조 격자 터치 데모"></div>
-          <p class="demo__hint">격자를 손가락이나 마우스로 쓸어보세요. 교차점이 곧 센서 셀입니다 · 씨실·날실 중 전도성 실만 표시됩니다.</p>
-        </div>
-      </div>
+          <div class="jacq">
+            <div class="jacq__fabric">
+              <p class="jacq__label">재킷 소매 (전도성 실이 함께 직조됨)</p>
+              <div class="weave" id="weave" aria-label="직조 터치 데모"></div>
+            </div>
+            <div class="jacq__phone">
+              <p class="jacq__label">연결된 폰</p>
+              <div class="phone">
+                <div class="phone__screen">
+                  <p class="phone__track" id="jacq-track">Track 3</p>
+                  <p class="phone__action" id="jacq-action">소매를 쓸어보세요</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="demo__hint">진한 선이 전도성 실입니다. 소매를 <b>오른쪽으로 쓸면 다음 곡</b>, <b>왼쪽으로 쓸면 이전 곡</b>, 톡 치면 재생/일시정지. 제스처를 읽는 건 앱이 아니라 천의 직조 구조입니다.</p>
+              </div>
     </div>
   </article>
 
@@ -591,6 +627,6 @@ WHERE 'design' IN tags
   <p>디자인 스터디 자료 · 2026-08-30 · 데모는 설명용 시뮬레이션이며 실제 물건은 코드 없이 같은 일을 합니다.</p>
 </footer>
 
-<script src="script.js?v=20"></script>
+<script src="script.js?v=40"></script>
 </body>
 </html>
