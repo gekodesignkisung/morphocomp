@@ -63,8 +63,8 @@
   (function topnav() {
     const links = $$('.topbar__nav a'); if (!links.length) return;
     const SUB = {
-      everyday: [['sec-funnel', '깔때기'], ['sec-bimetal', '바이메탈'], ['sec-usb', 'USB-C'], ['sec-shuttlecock', '셔틀콕·보행기'], ['sec-notched', '동전 분류기'], ['sec-more', '지퍼·모래시계']],
-      research: [['sec-biologic', 'bioLogic'], ['sec-pasta', 'Morphing Pasta'], ['sec-jacquard', 'Jacquard·Foldio'], ['sec-radical', 'Radical Atoms·4D']],
+      everyday: [['sec-funnel', '깔때기'], ['sec-bimetal', '바이메탈'], ['sec-usb', 'USB-C'], ['sec-shuttlecock', '셔틀콕'], ['sec-notched', '동전 분류기'], ['sec-more', '지퍼·모래시계']],
+      research: [['sec-biologic', 'bioLogic'], ['sec-pasta', 'Morphing Pasta'], ['sec-jacquard', 'Jacquard·Foldio']],
       theory: [['sec-morph', 'Morphological'], ['sec-reservoir', 'Reservoir'], ['sec-logic', 'Mechanical Logic'], ['sec-pi', 'Physical Intelligence'], ['sec-composites', 'Material Programming']],
       tradeoff: [['sec-picker', '판정 도구'], ['sec-table', '비교표']],
       sources: []
@@ -559,6 +559,7 @@
     const N = 16; const cells = [];
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
       const d = document.createElement('div'); d.className = 'weave__cell';
+      if ((r + c) % 2) d.classList.add('alt'); // 직조 교차: 한 칸 걸러 씨실이 위
       if (r % 3 === 1) d.classList.add('is-cond-h'); // 전도성 씨실
       if (c % 3 === 1) d.classList.add('is-cond-v'); // 전도성 날실
       box.appendChild(d); cells.push(d);
@@ -598,11 +599,13 @@
         const rr = Math.floor(j / N), cc = j % N;
         const cond = cell.classList.contains('is-cond-h') || cell.classList.contains('is-cond-v');
         const dist = Math.hypot(rr - rc.r, cc - rc.c);
-        cell.classList.toggle('is-hot', cond && dist < 1.8);
-        cell.classList.toggle('is-warm', cond && dist >= 1.8 && dist < 3.4);
+        cell.classList.toggle('is-press-center', dist < 1.2);        // 손가락이 닿은 자리
+        cell.classList.toggle('is-press', dist >= 1.2 && dist < 2.6); // 눌려 들어간 주변
+        cell.classList.toggle('is-hot', cond && dist < 2.2);
+        cell.classList.toggle('is-warm', cond && dist >= 2.2 && dist < 4);
       });
     }
-    function clearGlow() { cells.forEach(c => c.classList.remove('is-hot', 'is-warm')); }
+    function clearGlow() { cells.forEach(c => c.classList.remove('is-hot', 'is-warm', 'is-press', 'is-press-center')); }
     function setAction(text) { action.textContent = text; }
     box.addEventListener('pointerdown', e => {
       e.preventDefault(); down = true;
@@ -629,6 +632,91 @@
       track.textContent = `Track ${trackNo}` + (playing ? ' ♪' : ' (정지)');
       startCol = lastCol = null;
     });
+  })();
+
+  /* ---------- 3-0 수동 보행기 (컴퍼스 보행) ---------- */
+  (function walker() {
+    const cv = $('#walker'); if (!cv) return;
+    const ctx = cv.getContext('2d'); const W = cv.width, H = cv.height;
+    const slider = $('#walker-slope'), out = $('#walker-out');
+    const L = 54, A = 0.38; // 다리 길이, 반보폭 각
+    // 상태: 디딤발 위치(경사면 위 x), 걸음 진행도 t(0..1)
+    let footX = 90, t = 0, fallen = 0;
+    function reset() { footX = 90; t = 0; fallen = 0; }
+    $('#walker-reset').addEventListener('click', () => { reset(); Sound.click(); });
+    slider.addEventListener('input', () => { if (fallen) reset(); });
+    function slopeY(px, s) { return 96 + (px - 20) * Math.tan(s); }
+    function draw() {
+      const deg = +slider.value; out.value = deg;
+      const s = deg * Math.PI / 180;
+      const v = { x: Math.cos(s), y: Math.sin(s) };   // 경사 내리막 방향
+      const n = { x: Math.sin(s), y: -Math.cos(s) };  // 경사면 위쪽 법선
+      const u = th => ({ x: n.x * Math.cos(th) + v.x * Math.sin(th), y: n.y * Math.cos(th) + v.y * Math.sin(th) });
+      ctx.clearRect(0, 0, W, H);
+      // 경사면 + 빗금
+      ctx.strokeStyle = INK; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(20, slopeY(20, s)); ctx.lineTo(W - 20, slopeY(W - 20, s)); ctx.stroke();
+      ctx.strokeStyle = '#d4d4d4'; ctx.lineWidth = 1;
+      for (let hx = 30; hx < W - 20; hx += 26) {
+        const hy = slopeY(hx, s);
+        ctx.beginPath(); ctx.moveTo(hx, hy + 1); ctx.lineTo(hx - 8, hy + 9); ctx.stroke();
+      }
+      const canWalk = deg >= 3 && deg <= 11 && !fallen;
+      const stopped = deg < 3;
+      if (canWalk) {
+        // 도립 진자: 중력을 따라 내려가는 구간(몸이 발 앞으로 넘어간 뒤)이 더 빠르다
+        const base = 0.012 + (deg - 3) * 0.004;
+        t += base * (0.6 + 1.1 * t);
+        if (t >= 1) { // 착지: 역할 교대
+          const land = { x: footX + L * u(-A + 2 * A).x * 0 } ; // placeholder
+          footX = footX + 2 * L * Math.sin(A); // 경사면을 따라 한 보폭 전진
+          t = 0; Sound.tick();
+          if (footX > W - 110) footX = 90;
+        }
+      } else if (deg > 11 && !fallen) { fallen = 0.01; Sound.snap(); }
+      if (fallen > 0 && fallen < 1) fallen = Math.min(1, fallen + 0.05);
+
+      // 기하: 디딤다리 각 -A→+A, 흔드는 다리 +A→-A (무릎 굽힘으로 지면 스침)
+      const thSt = -A + 2 * A * t;
+      const thSw = A - 2 * A * t;
+      const foot = { x: footX, y: slopeY(footX, s) };
+      const hip = { x: foot.x + L * u(thSt).x, y: foot.y + L * u(thSt).y };
+      // 흔드는 다리: 허벅지+정강이, 중간에 무릎이 굽어 발끝이 들린다
+      const bend = 0.9 * Math.sin(Math.PI * t); // 스윙 중반에 최대 굽힘
+      const half = L / 2;
+      const thThigh = thSw + bend * 0.55;
+      const knee = { x: hip.x - half * u(thThigh).x * -1, y: 0 }; // 계산 아래에서
+      const kx = hip.x + (-half) * u(thThigh).x * -1; // not used
+      const kneeP = { x: hip.x - half * u(thThigh).x, y: hip.y - half * u(thThigh).y };
+      // foot는 hip에서 아래로: leg 방향은 -u(θ)
+      const knee2 = { x: hip.x - half * u(thThigh).x * 1, y: hip.y - half * u(thThigh).y * 1 };
+      const thShin = thSw - bend * 0.35;
+      const swFoot = { x: knee2.x - half * u(thShin).x, y: knee2.y - half * u(thShin).y };
+
+      ctx.save();
+      if (fallen) { ctx.translate(foot.x, foot.y); ctx.rotate(fallen * Math.PI / 2.1); ctx.translate(-foot.x, -foot.y); }
+      // 흔드는 다리 (회색, 무릎 관절)
+      ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = INK3;
+      ctx.beginPath(); ctx.moveTo(hip.x, hip.y); ctx.lineTo(knee2.x, knee2.y); ctx.lineTo(swFoot.x, swFoot.y); ctx.stroke();
+      ctx.fillStyle = INK3; ctx.beginPath(); ctx.arc(knee2.x, knee2.y, 3.5, 0, Math.PI * 2); ctx.fill();
+      // 흔드는 발
+      ctx.strokeStyle = INK3; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(swFoot.x - 4 * v.x, swFoot.y - 4 * v.y); ctx.lineTo(swFoot.x + 8 * v.x, swFoot.y + 8 * v.y); ctx.stroke();
+      // 디딤다리 (검정, 곧게 편 채 회전)
+      ctx.strokeStyle = INK; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(foot.x, foot.y); ctx.lineTo(hip.x, hip.y); ctx.stroke();
+      // 디딤발
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(foot.x - 5 * v.x, foot.y - 5 * v.y); ctx.lineTo(foot.x + 9 * v.x, foot.y + 9 * v.y); ctx.stroke();
+      // 몸통(질량)
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(hip.x, hip.y, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
+      ctx.fillStyle = INK3; ctx.font = '14px monospace';
+      ctx.fillText(fallen ? '너무 가파름 → 넘어짐 (다시 세우기)' : stopped ? '경사 부족 → 에너지가 모자라 멈춤' : `걷는 중 · 제어기 없음 (경사 ${deg}°)`, 24, 24);
+      requestAnimationFrame(draw);
+    }
+    draw();
   })();
 
   /* ---------- 3. 저장소 계산 ---------- */

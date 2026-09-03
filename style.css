@@ -93,6 +93,20 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 .section:last-of-type { border-bottom: 0; }
 .section__head { margin-bottom: 40px; }
 .section__num { display: inline-block; font-size: 12px; color: var(--ink-3); border: 1px solid var(--line); padding: 2px 8px; margin-bottom: 12px; font-family: var(--mono); }
+.section__kind {
+  display: inline-block; font-size: 12px; font-family: var(--mono); letter-spacing: 0.06em;
+  color: var(--ink-2); border: 1px solid var(--ink-2); padding: 3px 10px; border-radius: 999px; margin-bottom: 14px;
+}
+.section--tinted {
+  background: var(--paper-2); border-radius: 16px;
+  padding: 48px 32px; margin: 32px 0; border-bottom: 0;
+}
+.section--tinted .case { border-top-color: var(--line); }
+.section--tinted .demo { background: var(--paper); }
+.section--tinted .demo__stage { background: var(--paper); }
+.section--tinted .svg-demo, .section--tinted .demo__stage canvas { background: #ededed; }
+.section--tinted .section__kind { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
 .section__title { margin: 0 0 12px; font-size: clamp(24px, 3.5vw, 34px); line-height: 1.25; letter-spacing: -0.01em; }
 .section__lead { margin: 0; color: var(--ink-2); max-width: 680px; }
 
@@ -113,6 +127,7 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 .figure img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: var(--paper-2); border-radius: 10px; filter: grayscale(1); transition: filter .3s; }
 .figure img:hover { filter: grayscale(0); }
 .figure--small img { aspect-ratio: 16/9; }
+.figure--natural img { aspect-ratio: auto; object-fit: contain; background: #fff; }
 .figure figcaption { font-size: 13px; color: var(--ink-3); margin-top: 8px; line-height: 1.5; }
 .figure--card img { aspect-ratio: 1; }
 .figure--card figcaption { font-size: 14px; color: var(--ink-2); }
@@ -229,16 +244,37 @@ pre.compare__panel { font-family: var(--mono); font-size: 13px; line-height: 1.6
 /* Weave: 재킷 소매 + 폰 */
 .jacq { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; align-items: start; }
 .jacq__label { margin: 0 0 8px; font-size: 12px; font-family: var(--mono); color: var(--ink-3); }
-.weave { display: grid; grid-template-columns: repeat(16, 1fr); background: var(--paper-2); padding: 10px; border-radius: 10px; touch-action: none; user-select: none; cursor: crosshair; }
-.weave__cell { aspect-ratio: 1; position: relative; }
-.weave__cell::before, .weave__cell::after { content: ""; position: absolute; background: #ddd; transition: background .25s; }
-.weave__cell::before { left: 0; right: 0; top: 50%; height: 1px; }   /* 씨실 */
-.weave__cell::after { top: 0; bottom: 0; left: 50%; width: 1px; }    /* 날실 */
-.weave__cell.is-cond-h::before { background: var(--ink-3); height: 2px; }
-.weave__cell.is-cond-v::after { background: var(--ink-3); width: 2px; }
-.weave__cell.is-warm.is-cond-h::before, .weave__cell.is-warm.is-cond-v::after { background: var(--ink-2); transition: background 0s; }
-.weave__cell.is-hot.is-cond-h::before { background: var(--ink); height: 3px; transition: background 0s; }
-.weave__cell.is-hot.is-cond-v::after { background: var(--ink); width: 3px; transition: background 0s; }
+.weave {
+  position: relative; display: grid; grid-template-columns: repeat(16, 1fr);
+  background: var(--paper-2); padding: 12px; border-radius: 12px;
+  touch-action: none; user-select: none; cursor: pointer;
+}
+.weave::after { /* 천 가장자리 스티치 */
+  content: ""; position: absolute; inset: 5px; border: 1px dashed #c4c4c4; border-radius: 9px; pointer-events: none;
+}
+/* 씨실(가로)·날실(세로)을 띠로 그리고, 칸마다 위아래 교차를 뒤집어 직조 패턴을 만든다 */
+.weave__cell {
+  aspect-ratio: 1;
+  --wf: #dcdcdc; /* 씨실 */
+  --wp: #d2d2d2; /* 날실 */
+  background-image:
+    linear-gradient(90deg, transparent 8%, var(--wp) 8%, var(--wp) 92%, transparent 92%),
+    linear-gradient(transparent 8%, var(--wf) 8%, var(--wf) 92%, transparent 92%);
+  transition: --wf .25s, --wp .25s;
+}
+.weave__cell.alt { /* 옆 칸은 씨실이 위로 */
+  background-image:
+    linear-gradient(transparent 8%, var(--wf) 8%, var(--wf) 92%, transparent 92%),
+    linear-gradient(90deg, transparent 8%, var(--wp) 8%, var(--wp) 92%, transparent 92%);
+}
+.weave__cell.is-cond-h { --wf: #8e8e8e; }
+.weave__cell.is-cond-v { --wp: #8e8e8e; }
+.weave__cell.is-warm.is-cond-h { --wf: #4a4a4a; }
+.weave__cell.is-warm.is-cond-v { --wp: #4a4a4a; }
+.weave__cell.is-press { background-color: #cfcfcf; }        /* 눌린 주변 */
+.weave__cell.is-press-center { background-color: #b5b5b5; } /* 손가락 자리 */
+.weave__cell.is-hot.is-cond-h { --wf: #111; }
+.weave__cell.is-hot.is-cond-v { --wp: #111; }
 .phone { border: 2px solid var(--ink); border-radius: 14px; padding: 8px; max-width: 170px; }
 .phone__screen { background: var(--paper-2); border-radius: 8px; padding: 18px 12px; text-align: center; min-height: 96px; }
 .phone__track { margin: 0 0 8px; font-family: var(--mono); font-size: 15px; font-weight: 700; }
@@ -252,10 +288,12 @@ pre.compare__panel { font-family: var(--mono); font-size: 13px; line-height: 1.6
 .theory__item h3 { margin: 0 0 10px; font-size: 19px; line-height: 1.4; }
 .theory__item h3 .muted { display: block; font-size: 13px; font-weight: 400; }
 .theory__item p { margin: 0; color: var(--ink-2); max-width: 760px; }
+.theory__fig { max-width: 340px; margin: 14px 0; }
+.theory__fig img { aspect-ratio: 4/3; }
 .theory__item--demo .demo { max-width: 760px; }
 
 /* Tradeoff */
-.tradeoff { border: 1px solid var(--ink); padding: 20px; display: grid; gap: 20px; margin-bottom: 32px; }
+.tradeoff { display: grid; gap: 20px; }
 .tradeoff__pick p { margin: 0 0 8px; font-size: 13px; }
 .tradeoff__criteria { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
 .crit { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 8px 10px; border: 1px solid var(--line); cursor: pointer; }

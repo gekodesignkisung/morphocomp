@@ -62,13 +62,6 @@
   "license": "CC BY-SA 3.0",
   "page": "https://commons.wikimedia.org/wiki/File:Bimetallic_strip_from_circuit_breaker.JPG"
  },
- "natto": {
-  "file": "img/natto.png",
-  "title": "Bacillus subtilis natto colonies.png",
-  "artist": "Catfaster",
-  "license": "CC BY-SA 4.0",
-  "page": "https://commons.wikimedia.org/wiki/File:Bacillus_subtilis_natto_colonies.png"
- },
  "textile": {
   "file": "img/textile.jpg",
   "title": "Textile-sensor2.jpg",
@@ -76,25 +69,18 @@
   "license": "CC BY-SA 4.0",
   "page": "https://commons.wikimedia.org/wiki/File:Textile-sensor2.jpg"
  },
- "fourd": {
-  "file": "img/fourd.jpg",
-  "title": "3d folding structures mimicking the usps mailbox.jpg",
-  "artist": "Yiqi Mao, Kai Yu, Michael S. Isakov, Jiangtao Wu, Martin L. Dunn &amp; H. Jerry Qi",
-  "license": "CC BY 4.0",
-  "page": "https://commons.wikimedia.org/wiki/File:3d_folding_structures_mimicking_the_usps_mailbox.jpg"
+ "biologic_real": {
+  "file": "img/biologic_real.png",
+  "title": "bioLogic fabric (2015-bioLogic badge)",
+  "artist": "MIT Tangible Media Group",
+  "license": "CC BY-NC-ND 3.0",
+  "page": "https://tangible.media.mit.edu/project/biologic/"
  },
- "fourd2": {
-  "file": "img/fourd2.jpg",
-  "title": "Multishape active composites by 3d printing of digial smps.jpg",
-  "artist": "Jiangtao Wu, Chao Yuan, Zhen Ding, Michael Isakov, Yiqi Mao, Tiejun Wang, Martin L. Dunn &amp; H. Jerry Qi",
-  "license": "CC BY-SA 4.0",
-  "page": "https://commons.wikimedia.org/wiki/File:Multishape_active_composites_by_3d_printing_of_digial_smps.jpg"
- },
- "pasta": {
-  "file": "img/pasta.jpg",
-  "title": "Girandole.jpeg",
-  "artist": "Popo le Chien",
-  "license": "CC BY-SA 3.0",
-  "page": "https://commons.wikimedia.org/wiki/File:Girandole.jpeg"
+ "pasta_paper": {
+  "file": "img/pasta_paper.jpg",
+  "title": "Morphing pasta and beyond, Fig. 1",
+  "artist": "Ye Tao, Lining Yao et al.",
+  "license": "CC BY-NC 4.0",
+  "page": "https://www.science.org/doi/10.1126/sciadv.abf4098"
  }
 }
