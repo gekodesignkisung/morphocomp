@@ -76,8 +76,8 @@
     const setActive = a => {
       links.forEach(l => l.classList.remove('is-active'));
       if (a) a.classList.add('is-active');
-      // 최상단(활성 섹션 없음)에서는 대메뉴를 가운데로
-      if (nav) nav.classList.toggle('is-centered', !a);
+      // 최상단(활성 섹션 없음)에서는 대메뉴를 왼쪽으로
+      if (nav) nav.classList.toggle('is-start', !a);
     };
     const setSub = id => $$('a', subInner).forEach(a => a.classList.toggle('is-active', a.dataset.sub === id));
     const subIO = new IntersectionObserver(entries => {
