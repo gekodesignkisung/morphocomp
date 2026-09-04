@@ -311,11 +311,13 @@ pre.compare__panel { font-family: var(--mono); font-size: 13px; line-height: 1.6
 .tradeoff__verdict .bar-legend b { color: var(--ink); }
 .tradeoff__verdict .bar-reading { font-size: 13px; margin: 8px 0 0; padding-left: 10px; border-left: 2px solid var(--ink); line-height: 1.6; }
 
-.table-wrap { overflow-x: auto; }
-.table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 560px; }
-.table th, .table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+/* 좁은 칼럼 안에 들어가는 표라 가로 스크롤 대신 줄바꿈으로 맞춘다 */
+.table-wrap { overflow-x: visible; }
+.table { border-collapse: collapse; width: 100%; font-size: 14px; table-layout: fixed; }
+.table th, .table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: break-word; }
 .table thead th { border-bottom: 1px solid var(--ink); font-weight: 700; }
-.table tbody th { font-weight: 700; white-space: nowrap; color: var(--ink-2); width: 100px; }
+.table tbody th { font-weight: 700; color: var(--ink-2); width: 22%; }
+.table thead th:first-child { width: 22%; }
 
 /* Sources */
 .sources { display: grid; grid-template-columns: 3fr 2fr; gap: 40px; font-size: 14px; }
