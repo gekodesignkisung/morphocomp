@@ -512,36 +512,27 @@
 
   <article class="case" id="sec-reservoir">
     <div class="case__media">
-      <p class="demo__note">학습되는 건 마지막 "읽기" 가중치뿐입니다. 입력을 뒤섞는 비선형 변환 · 신경망의 은닉층이 하던 일 · 은 재료의 동역학이 합니다.</p>
+      <p class="demo__note">신경망은 은닉층을 학습시켜 입력을 뒤섞습니다. 여기서는 그 뒤섞는 일을 <b>재료의 흔들림</b>이 대신합니다. 학습되는 건 마지막 한 줄 · 흔들림을 얼마씩 섞을지 정하는 가중치뿐입니다.</p>
     </div>
     <div class="case__body">
       <h3 class="case__title">Physical Reservoir Computing <span class="case__tag">Nakajima, Hauser 외, 2013–2015</span></h3>
-      <p>실리콘으로 만든 문어 다리 모델에 입력을 흘리고, 다리 여기저기의 변형만 읽어 선형 회귀로 출력을 학습합니다. 재료의 비선형 동역학이 신경망의 은닉층 역할을 합니다.</p>
+      <p>실리콘 문어 다리에 입력을 흘리고, 다리 여기저기의 변형만 읽습니다. 다리는 훈련되지 않습니다 · 그냥 흔들릴 뿐입니다. 그 흔들림에 입력의 과거가 저마다 다르게 남아 있어서, 적당한 비율로 더하기만 해도 <b>입력만으로는 만들 수 없는 출력</b>이 나옵니다.</p>
       <div class="demo">
         <div class="demo__stage">
-          <canvas id="reservoir" width="600" height="220" aria-label="스프링 질량 저장소 시뮬레이션"></canvas>
-          <p class="demo__hint">왼쪽 노드를 드래그하면 입력 신호가 스프링 네트워크를 통과합니다. 오른쪽 그래프는 세 노드의 응답 · 같은 입력이 서로 다른 비선형 함수로 변환된 것입니다.</p>
-        </div>
-      </div>
-    </div>
-  </article>
-
-  <article class="case" id="sec-logic">
-    <div class="case__media">
-      <p class="demo__note">쌍안정(bistable) 구조는 눌린 상태를 스스로 유지합니다. 전원이 필요 없는 1비트 메모리입니다.</p>
-    </div>
-    <div class="case__body">
-      <h3 class="case__title">Mechanical Logic / Metamaterials <span class="case__tag">Bertoldi (Harvard) 외, <i>Nature Communications</i> 2021 등</span></h3>
-      <p>격자 구조의 좌굴(buckling) 모드를 회로 연결과 대응시켜 AND/OR/NOT 게이트와 기계식 메모리를 만듭니다. 전자 없이 힘만으로 논리를 처리합니다.</p>
-      <div class="demo">
-        <div class="demo__stage">
-          <svg id="logic" viewBox="0 0 400 180" class="svg-demo" aria-label="기계식 AND 게이트"></svg>
+          <canvas id="reservoir" width="620" height="300" aria-label="스프링 네트워크 저장소 계산 시뮬레이션"></canvas>
           <div class="demo__controls">
-            <button class="btn" data-logic="a">입력 A 누르기</button>
-            <button class="btn" data-logic="b">입력 B 누르기</button>
-            <button class="btn btn--ghost" data-logic="reset">리셋</button>
+            <span class="demo__label">① 만들고 싶은 출력</span>
+            <button class="btn" data-res-task="delay">입력의 과거</button>
+            <button class="btn btn--ghost" data-res-task="smooth">부드럽게 누적</button>
+            <button class="btn btn--ghost" data-res-task="wave">느린 파동</button>
           </div>
-          <p class="demo__hint">두 입력이 모두 눌려야 출력 빔이 좌굴됩니다. 한 번 좌굴된 빔은 쌍안정이라 손을 떼도 상태가 유지됩니다 · 메모리.</p>
+          <div class="demo__controls">
+            <span class="demo__label">② 재료로 만들어보기</span>
+            <button class="btn" data-res-train>재료로 만들어보기</button>
+            <button class="btn btn--ghost" data-res-pause>일시정지</button>
+            <button class="btn btn--ghost" data-res-reset>처음부터</button>
+          </div>
+          <p class="demo__hint">세 개의 <b>읽기 지점</b>이 같은 입력에 저마다 다르게 흔들립니다. 버튼을 누르면 그 셋을 섞는 비율만 계산합니다 · 재료는 그대로입니다.</p>
         </div>
       </div>
     </div>
@@ -549,24 +540,58 @@
 
   <article class="case" id="sec-pi">
     <div class="case__media">
-      <p class="demo__note">지능 = 뇌의 계산 지능(CI) + 몸에 인코딩된 물리 지능(PI). 소형 로봇에는 뇌를 넣을 공간이 없습니다.</p>
+      <p class="demo__note">지능 = 뇌의 계산 지능(CI) + 몸에 인코딩된 물리 지능(PI). 몸이 작아지면 뇌를 넣을 자리가 사라집니다 · 그러면 지능은 <b>몸의 형태와 재질로 옮겨갈 수밖에</b> 없습니다.</p>
     </div>
     <div class="case__body">
       <h3 class="case__title">Physical Intelligence <span class="case__tag">Metin Sitti, <i>Extreme Mechanics Letters</i>, 2021</span></h3>
-      <p>지능은 뇌의 계산 지능(CI)뿐 아니라 몸에 인코딩된 물리 지능(PI)으로도 구성된다는 프레임. 소형 로봇에서는 뇌를 넣을 공간이 없으므로 감지·구동·제어를 재료 특성으로 통합해야 합니다.</p>
+      <p>지능은 뇌의 계산 지능(CI)뿐 아니라 몸에 인코딩된 물리 지능(PI)으로도 구성된다는 프레임. 부품에는 <b>줄일 수 없는 최소 크기</b>가 있어서, 로봇이 밀리미터급이 되면 배터리도 MCU도 실을 수 없습니다. 감지·구동·제어를 재료 특성으로 옮겨야 하는 이유입니다.</p>
+      <div class="demo">
+        <div class="demo__stage">
+          <canvas id="pi" width="620" height="260" aria-label="로봇 크기에 따른 탑재 가능 부품 시뮬레이션"></canvas>
+          <div class="demo__controls">
+            <label class="range" style="margin-top:0">
+              <span>로봇 크기 <output id="pi-out">50</output> mm</span>
+              <input type="range" id="pi-size" min="0.3" max="100" value="50" step="0.1">
+            </label>
+          </div>
+          <p class="demo__hint">슬라이더로 로봇을 줄여보세요. 부품이 하나씩 빠지고, 뇌가 빠진 뒤에 남는 건 형태·재질이 맡는 기능뿐입니다.</p>
+        </div>
+      </div>
     </div>
   </article>
 
   <article class="case" id="sec-composites">
     <div class="case__media">
-      <p class="demo__note">스터디 소개문의 "물성을 센싱과 계산 과정의 일부로 바라보는 연구"는 이 계보를 가리킵니다.</p>
+      <p class="demo__note">컴퓨터는 혼자서는 아무것도 표현하지 못합니다. <b>재료와 합쳐질 때</b> 비로소 표현이 됩니다 · 그 합친 것이 Computational Composite입니다. 그리고 <b>어떤 물성으로 표현할지 고르는 일</b>이 Material Programming입니다.</p>
     </div>
     <div class="case__body">
       <h3 class="case__title">Computational Composites · Material Programming <span class="case__tag">Vallgårda &amp; Redström, CHI 2007 · Vallgårda 외, NordiCHI 2016</span></h3>
-      <p>HCI 쪽에서 이 관점을 가장 명시적으로 세운 논문. 컴퓨터를 <em>다른 재료와 결합해야 비로소 표현되는 재료</em>로 보자고 제안(2007).
-      이어서 디자이너가 코드가 아니라 재료의 반응 특성 자체를 프로그래밍하는 실천을 "Material Programming"으로 명명(2016).</p>
+      <p>컴퓨터를 <em>다른 재료와 결합해야 비로소 표현되는 재료</em>로 보자는 제안(2007). 이어서 디자이너가 코드가 아니라 재료의 반응 특성 자체를 프로그래밍하는 실천을 "Material Programming"이라 이름 붙였습니다(2016).</p>
+      <div class="demo">
+        <div class="demo__stage">
+          <div class="comp" id="comp">
+            <p class="comp__task">만들 것 · <b>실내 온도를 알려주는 물건</b></p>
+            <div class="comp__row">
+              <button class="comp__part" data-comp="code" aria-pressed="false"><b>연산</b><span>온도를 재고 판단함</span></button>
+              <span class="comp__plus">+</span>
+              <button class="comp__part" data-comp="mat" aria-pressed="false"><b>재료</b><span>손에 잡히는 물건</span></button>
+            </div>
+            <div class="comp__result" id="comp-result"></div>
+            <div class="comp__mp" id="comp-mp" hidden>
+              <p class="comp__mplabel">Material Programming · 같은 연산을 <b>어떤 물성으로</b> 표현할까?</p>
+              <div class="comp__props">
+                <button class="btn btn--ghost" data-prop="color">색</button>
+                <button class="btn btn--ghost" data-prop="shape">형태</button>
+                <button class="btn btn--ghost" data-prop="stiff">단단함</button>
+              </div>
+            </div>
+          </div>
+          <p class="demo__hint">연산과 재료를 모두 켜야 물건이 됩니다. 그다음 <b>어떤 물성으로 표현할지</b> 골라보세요 · 코드는 그대로인데 물건의 성격이 바뀝니다.</p>
+        </div>
+      </div>
     </div>
   </article>
+
 </section>
 
 <!-- ================================================================
@@ -584,8 +609,9 @@
       <p class="demo__note">같은 "타이머"라도 조건에 따라 모래시계가 답이 되기도, 앱이 답이 되기도 합니다. 답은 물건이 아니라 <em>조건</em>에 달려 있습니다. 각자 가져온 사례를 여기에 넣어 같은 기준으로 논의해 보세요.</p>
     </div>
     <div class="case__body">
-      <h3 class="case__title">판정 도구 <span class="case__tag">기능을 고르고 조건을 켜면 게이지가 기웁니다</span></h3>
-      <p>대체하고 싶은 소프트웨어 기능을 하나 고르고, 그 기능이 처한 조건을 켜보세요. "항상 켜져 있어야 한다"는 재료 쪽으로, "규칙이 자주 바뀐다"는 소프트웨어 쪽으로 게이지를 밀어냅니다.</p>
+      <h3 class="case__title">판정 도구 <span class="case__tag">지금까지의 사례를 실제 결정에 쓰기 위한 체크리스트</span></h3>
+      <p><b>무엇에 쓰는 물건인가</b> · 여기까지는 "재료가 계산할 수도 있다"는 사례를 봤습니다. 하지만 실무에서 필요한 판단은 <em>그래서 내 앞의 이 기능은 어느 쪽이냐</em>입니다. 재료가 늘 답은 아닙니다 · 규칙이 자주 바뀌거나 원격으로 상태를 공유해야 하면 소프트웨어가 맞습니다. 이 도구는 그 <b>경계를 같은 기준으로 따져보게</b> 합니다.</p>
+      <p class="muted">쓰는 법 · 대체하고 싶은 기능을 하나 고르고, 그 기능이 처한 조건을 켜면 게이지가 기웁니다. 판정 아래에 <b>어떤 조건이 어느 쪽으로 얼마나 밀었는지</b> 근거가 나옵니다 · 결론보다 이 근거를 놓고 이야기하는 쪽이 유용합니다.</p>
       <div class="demo">
         <div class="demo__stage">
           <div class="tradeoff">
@@ -653,7 +679,6 @@
         <li><a href="https://journals.sagepub.com/doi/10.1177/027836499000900206" target="_blank" rel="noopener">McGeer, Passive Dynamic Walking (IJRR 1990)</a></li>
         <li><a href="https://link.springer.com/article/10.1007/s00422-012-0471-0" target="_blank" rel="noopener">Hauser et al., Towards a theoretical foundation for morphological computation (Biol. Cybern. 2011)</a></li>
         <li><a href="https://www.nature.com/articles/srep10487" target="_blank" rel="noopener">Nakajima et al., Information processing via physical soft body (Sci. Rep. 2015)</a></li>
-        <li><a href="https://www.nature.com/articles/s41467-021-21920-y" target="_blank" rel="noopener">Digital logic gates in soft, conductive mechanical metamaterials (Nat. Commun. 2021)</a></li>
         <li><a href="https://www.boleideng.com/publication/PI_Sitti.pdf" target="_blank" rel="noopener">Sitti, Physical intelligence as a new paradigm (EML 2021, PDF)</a></li>
         <li><a href="https://dl.acm.org/doi/10.1145/1240624.1240706" target="_blank" rel="noopener">Vallgårda &amp; Redström, Computational Composites (CHI 2007)</a> · <a href="https://dx.doi.org/10.1145/2971485.2971554" target="_blank" rel="noopener">Material Programming (NordiCHI 2016)</a></li>
       </ul>
@@ -672,6 +697,6 @@
   <p>디자인 스터디 자료 · 2026-08-30 · 데모는 설명용 시뮬레이션이며 실제 물건은 코드 없이 같은 일을 합니다.</p>
 </footer>
 
-<script src="script.js?v=49"></script>
+<script src="script.js?v=61"></script>
 </body>
 </html>

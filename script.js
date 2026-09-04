@@ -65,7 +65,7 @@
     const SUB = {
       everyday: [['sec-funnel', '깔때기'], ['sec-bimetal', '바이메탈'], ['sec-usb', 'USB-C'], ['sec-shuttlecock', '셔틀콕'], ['sec-notched', '동전 분류기'], ['sec-more', '지퍼·모래시계']],
       research: [['sec-biologic', 'bioLogic'], ['sec-pasta', 'Morphing Pasta'], ['sec-jacquard', 'Jacquard·Foldio']],
-      theory: [['sec-morph', 'Morphological'], ['sec-reservoir', 'Reservoir'], ['sec-logic', 'Mechanical Logic'], ['sec-pi', 'Physical Intelligence'], ['sec-composites', 'Material Programming']],
+      theory: [['sec-morph', 'Morphological'], ['sec-reservoir', 'Reservoir'], ['sec-pi', 'Physical Intelligence'], ['sec-composites', 'Material Programming']],
       tradeoff: [['sec-picker', '판정 도구'], ['sec-table', '비교표']],
       sources: []
     };
@@ -719,91 +719,379 @@
     draw();
   })();
 
-  /* ---------- 3. 저장소 계산 ---------- */
+  /* ---------- 3. Physical Reservoir Computing ---------- */
   (function reservoir() {
     const cv = $('#reservoir'); if (!cv) return;
     const ctx = cv.getContext('2d'); const W = cv.width, H = cv.height;
-    // 스프링-질량 체인 (비선형 스프링)
+
+    // 스프링-질량 그물 (비선형 스프링). 학습되지 않는 "재료".
     const N = 9, nodes = [], springs = [];
-    for (let i = 0; i < N; i++) nodes.push({ x0: 40 + i * 34, y0: 110, x: 40 + i * 34, y: 110, vx: 0, vy: 0, k: 0.02 + (i % 3) * 0.02 });
+    for (let i = 0; i < N; i++) nodes.push({ x0: 40 + i * 25, y0: 74, x: 44 + i * 30, y: 74, vx: 0, vy: 0, k: 0.10 + (i % 3) * 0.05 });
     for (let i = 0; i < N - 1; i++) springs.push([i, i + 1]);
     for (let i = 0; i < N - 2; i += 2) springs.push([i, i + 2]);
-    const readouts = [2, 5, 8], hist = readouts.map(() => []), inHist = [];
-    let drag = null, t = 0;
-    function pos(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; }
-    cv.addEventListener('pointerdown', e => { drag = pos(e); });
-    cv.addEventListener('pointermove', e => { if (drag) drag = pos(e); });
-    window.addEventListener('pointerup', () => drag = null);
-    function step() {
+    // 초기 형상 그대로를 쉬는 길이로 삼는다 (안 그러면 대각 스프링이 발산)
+    springs.forEach(sp => { const a = nodes[sp[0]], b = nodes[sp[1]]; sp[2] = Math.hypot(a.x0 - b.x0, a.y0 - b.y0); });
+
+    const readouts = [2, 5, 8];            // 재료에서 읽는 세 지점
+    const LEN = 240;                       // 그래프에 보관하는 프레임 수
+    const inHist = [], resHist = readouts.map(() => []), outHist = [], tgtHist = [];
+    let w = [0, 0, 0], bias = 0, trained = false, task = 'delay', t = 0, fit = 0;
+
+    // 입력: 불규칙한 네모 파형 (기억이 필요하도록 결정적 의사난수)
+    let sq = 1, nextFlip = 40;
+    function inputAt() {
+      if (t >= nextFlip) { sq = -sq; nextFlip = t + 30 + Math.floor(Math.abs(Math.sin(t * 12.9898) * 43758.5453) % 45); }
+      return sq * 26;
+    }
+
+    // 목표 출력: 입력에 즉각 대응되지 않는(=기억·적분이 필요한) 신호
+    const TASKS = {
+      delay:  { label: '입력의 과거 (18프레임 전)',  fn: h => h.length > 18 ? h[h.length - 19] : 0 },
+      smooth: { label: '부드럽게 누적 (이동평균)',   fn: h => { const n = Math.min(40, h.length); let s = 0; for (let i = 0; i < n; i++) s += h[h.length - 1 - i]; return n ? s / n * 2.2 : 0; } },
+      wave:   { label: '느린 파동 (입력과 무관한 리듬)', fn: () => Math.sin(t * 0.035) * 24 },
+    };
+
+    function physics() {
       t++;
-      // 입력: 드래그 위치(없으면 사인파)
-      const input = drag ? Math.max(-60, Math.min(60, drag.y - 110)) : Math.sin(t * 0.05) * 30 * (t % 400 < 200 ? 1 : 0);
-      nodes[0].y = 110 + input; nodes[0].x = 40;
+      const input = inputAt();
+      nodes[0].y = 74 + input; nodes[0].x = 44; nodes[0].vy = 0;
       for (let i = 1; i < N; i++) {
         const n = nodes[i]; let fx = 0, fy = 0;
-        springs.forEach(([a, b]) => {
+        springs.forEach(sp => {
+          const a = sp[0], b = sp[1];
           if (a !== i && b !== i) return;
           const o = nodes[a === i ? b : a];
           const dx = o.x - n.x, dy = o.y - n.y, d = Math.hypot(dx, dy) || 1;
-          const rest = Math.abs(o.x0 - n.x0);
-          const s = (d - rest); const f = n.k * s + 0.0004 * s * s * s; // 비선형
+          const rest = sp[2];
+          let e = d - rest;
+          if (e > 40) e = 40; else if (e < -40) e = -40;      // 발산 방지
+          const f = n.k * e + 0.00035 * e * e * e;            // 비선형 (부드러운 포화)
           fx += f * dx / d; fy += f * dy / d;
         });
-        fy += (n.y0 - n.y) * 0.004; fx += (n.x0 - n.x) * 0.02;
-        n.vx = (n.vx + fx) * 0.96; n.vy = (n.vy + fy) * 0.96; n.x += n.vx; n.y += n.vy;
+        fy += (n.y0 - n.y) * 0.0015; fx += (n.x0 - n.x) * 0.02;
+        n.vx = (n.vx + fx) * 0.965; n.vy = (n.vy + fy) * 0.965;
+        if (n.vx > 6) n.vx = 6; else if (n.vx < -6) n.vx = -6;
+        if (n.vy > 6) n.vy = 6; else if (n.vy < -6) n.vy = -6;
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < n.x0 - 24) n.x = n.x0 - 24; else if (n.x > n.x0 + 24) n.x = n.x0 + 24;
+        if (n.y < n.y0 - 52) n.y = n.y0 - 52; else if (n.y > n.y0 + 52) n.y = n.y0 + 52;
       }
-      inHist.push(input); if (inHist.length > 200) inHist.shift();
-      readouts.forEach((r, i) => { hist[i].push(nodes[r].y - 110); if (hist[i].length > 200) hist[i].shift(); });
-      // 그리기
+      const feat = readouts.map(r => nodes[r].y - 74);
+      inHist.push(input); if (inHist.length > LEN) inHist.shift();
+      feat.forEach((v, i) => { resHist[i].push(v); if (resHist[i].length > LEN) resHist[i].shift(); });
+      tgtHist.push(TASKS[task].fn(inHist)); if (tgtHist.length > LEN) tgtHist.shift();
+      outHist.push(trained ? bias + w[0] * feat[0] + w[1] * feat[1] + w[2] * feat[2] : null);
+      if (outHist.length > LEN) outHist.shift();
+    }
+
+    // 선형 회귀 1회: 세 흔들림을 섞는 비율만 구한다 (재료는 건드리지 않음)
+    function train() {
+      const n = Math.min(resHist[0].length, tgtHist.length);
+      if (n < 60) return;
+      const X = [], y = [];
+      for (let i = 0; i < n; i++) { X.push([resHist[0][i], resHist[1][i], resHist[2][i], 1]); y.push(tgtHist[i]); }
+      const A = [], b = [];
+      for (let r = 0; r < 4; r++) {
+        A.push([0, 0, 0, 0]); b.push(0);
+        for (let c = 0; c < 4; c++) { let s = 0; for (let i = 0; i < n; i++) s += X[i][r] * X[i][c]; A[r][c] = s + (r === c ? 1e-3 * n : 0); }
+        let s = 0; for (let i = 0; i < n; i++) s += X[i][r] * y[i]; b[r] = s;
+      }
+      for (let c = 0; c < 4; c++) {
+        let p = c; for (let r = c + 1; r < 4; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+        const tmpA = A[c]; A[c] = A[p]; A[p] = tmpA;
+        const tmpB = b[c]; b[c] = b[p]; b[p] = tmpB;
+        if (Math.abs(A[c][c]) < 1e-9) continue;
+        for (let r = 0; r < 4; r++) {
+          if (r === c) continue;
+          const f = A[r][c] / A[c][c];
+          for (let k = c; k < 4; k++) A[r][k] -= f * A[c][k];
+          b[r] -= f * b[c];
+        }
+      }
+      const sol = [0, 1, 2, 3].map(i => Math.abs(A[i][i]) < 1e-9 ? 0 : b[i] / A[i][i]);
+      w = [sol[0], sol[1], sol[2]]; bias = sol[3]; trained = true;
+      let se = 0, sv = 0; const my = y.reduce((a, c) => a + c, 0) / n;
+      for (let i = 0; i < n; i++) { const p = bias + w[0] * X[i][0] + w[1] * X[i][1] + w[2] * X[i][2]; se += (p - y[i]) * (p - y[i]); sv += (y[i] - my) * (y[i] - my); }
+      fit = sv ? Math.max(0, 1 - se / sv) : 0;
+      Sound.snap();
+    }
+
+    // ---- 그리기 ----
+    // 좁은 화면에서는 위아래로 쌓는다 (가로 2단이면 글씨가 뭉갬)
+    let narrow = false, GX = 300, GW = 296, LX = 14, LW = 244;
+    function layout() {
+      narrow = window.innerWidth <= 700;
+      if (narrow) {
+        cv.width = 380; cv.height = 560;
+        GX = 16; GW = 348; LX = 16; LW = 348;
+      } else {
+        cv.width = 620; cv.height = 300;
+        GX = 300; GW = 296; LX = 14; LW = 244;
+      }
+    }
+    layout();
+    window.addEventListener('resize', layout);
+    function plot(arr, y0, scale, col, dash, width) {
+      ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = width || 1.5; ctx.setLineDash(dash || []);
+      ctx.beginPath(); let started = false;
+      arr.forEach((v, i) => {
+        if (v === null || v === undefined) { started = false; return; }
+        let vv = v * scale;
+        if (vv > 30) vv = 30; else if (vv < -30) vv = -30;
+        const x = GX + i / LEN * GW, y = y0 - vv;
+        if (started) ctx.lineTo(x, y); else { ctx.moveTo(x, y); started = true; }
+      });
+      ctx.stroke(); ctx.restore();
+    }
+
+    function draw() {
+      const W = cv.width, H = cv.height;
+      const RY = narrow ? 300 : 0;              // 좁을 때 오른쪽 열을 아래로 내린다
       ctx.clearRect(0, 0, W, H);
+      ctx.font = '12px monospace'; ctx.textAlign = 'left';
+
+      // --- 왼쪽: 재료 ---
+      ctx.fillStyle = INK3; ctx.fillText('재료 · 학습되지 않습니다', 14, 20);
       ctx.strokeStyle = INK3; ctx.lineWidth = 1;
       springs.forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke(); });
-      nodes.forEach((n, i) => { ctx.fillStyle = i === 0 ? INK : (readouts.includes(i) ? INK2 : '#bbb'); ctx.beginPath(); ctx.arc(n.x, n.y, i === 0 ? 8 : 5, 0, Math.PI * 2); ctx.fill(); });
-      ctx.fillStyle = INK3; ctx.font = '13px monospace'; ctx.fillText('input (drag)', 14, 24); ctx.fillText('readouts', 200, 24);
-      // 그래프
-      const gx = 340, gw = 240;
-      const plot = (arr, y0, col) => { ctx.strokeStyle = col; ctx.beginPath(); arr.forEach((v, i) => { const x = gx + i / 200 * gw, y = y0 - v * 0.4; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); };
-      ctx.strokeStyle = LINE; [40, 90, 140, 190].forEach(y => { ctx.beginPath(); ctx.moveTo(gx, y); ctx.lineTo(gx + gw, y); ctx.stroke(); });
-      plot(inHist, 40, INK); ctx.fillText('in', gx + gw + 4, 44);
-      hist.forEach((h, i) => { plot(h, 90 + i * 50, INK2); ctx.fillText('n' + readouts[i], gx + gw + 4, 94 + i * 50); });
-      requestAnimationFrame(step);
+      nodes.forEach((n, i) => {
+        const isR = readouts.indexOf(i);
+        ctx.fillStyle = i === 0 ? INK : (isR >= 0 ? INK2 : '#c4c4c4');
+        ctx.beginPath(); ctx.arc(n.x, n.y, i === 0 ? 8 : (isR >= 0 ? 6 : 4), 0, Math.PI * 2); ctx.fill();
+        if (isR >= 0) { ctx.fillStyle = INK3; ctx.fillText('r' + (isR + 1), n.x - 7, n.y + 22); }
+      });
+      ctx.fillStyle = INK; ctx.fillText('입력', 16, 112);
+
+      // 세 읽기 지점의 서로 다른 응답
+      ctx.fillStyle = INK3; ctx.fillText('읽기 지점 3곳 · 같은 입력, 다른 흔들림', LX, narrow ? 156 : 150);
+      resHist.forEach((h, i) => {
+        const y0 = (narrow ? 196 : 180) + i * 36;
+        ctx.strokeStyle = LINE; ctx.beginPath(); ctx.moveTo(LX, y0); ctx.lineTo(LX + LW, y0); ctx.stroke();
+        ctx.save(); ctx.strokeStyle = INK2; ctx.lineWidth = 1.3; ctx.beginPath();
+        h.forEach((v, j) => { const x = LX + j / LEN * LW, y = y0 - v * 0.7; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+        ctx.stroke(); ctx.restore();
+        ctx.fillStyle = INK3; ctx.fillText('r' + (i + 1), LX + LW + 6, y0 + 4);
+      });
+
+      // --- 오른쪽: 과제 ---
+      ctx.fillStyle = INK3; ctx.fillText('입력', GX, 20 + RY);
+      ctx.strokeStyle = LINE; ctx.beginPath(); ctx.moveTo(GX, 42 + RY); ctx.lineTo(GX + GW, 42 + RY); ctx.stroke();
+      plot(inHist, 42 + RY, 0.5, INK, [], 1.5);
+
+      ctx.fillStyle = INK3; ctx.fillText('목표: ' + TASKS[task].label, GX, 84 + RY);
+      ctx.strokeStyle = LINE; ctx.beginPath(); ctx.moveTo(GX, 124 + RY); ctx.lineTo(GX + GW, 124 + RY); ctx.stroke();
+      plot(tgtHist, 124 + RY, 0.8, INK3, [4, 3], 2);
+      if (trained) plot(outHist, 124 + RY, 0.8, INK, [], 2);
+
+      ctx.fillStyle = INK3; ctx.fillText('- - - 목표', GX, 166 + RY);
+      if (trained) { ctx.fillStyle = INK; ctx.fillText('—— 재료로 만든 출력', GX + 74, 166 + RY); }
+
+      ctx.fillStyle = INK3; ctx.fillText('학습되는 것은 이 숫자 4개뿐', GX, 196 + RY);
+      if (trained) {
+        ctx.fillStyle = INK; ctx.font = '13px monospace';
+        const f2 = v => (Math.abs(v) < 0.005 ? 0 : v).toFixed(2);
+        const f1 = v => (Math.abs(v) < 0.05 ? 0 : v).toFixed(1);
+        ctx.fillText('출력 = ' + f2(w[0]) + '·r1 ' + (w[1] < 0 ? '- ' : '+ ') + f2(Math.abs(w[1])) + '·r2', GX, 214 + RY);
+        ctx.fillText('        ' + (w[2] < 0 ? '- ' : '+ ') + f2(Math.abs(w[2])) + '·r3 ' + (bias < 0 ? '- ' : '+ ') + f1(Math.abs(bias)), GX, 232 + RY);
+        ctx.font = '12px monospace'; ctx.fillStyle = INK2;
+        ctx.fillText('목표와 ' + Math.round(fit * 100) + '% 일치', GX, 258 + RY);
+        ctx.fillStyle = INK3;
+        ctx.fillText('재료는 그대로입니다.', GX, 278 + RY);
+      } else {
+        ctx.fillStyle = INK2; ctx.font = '13px monospace';
+        ctx.fillText('아직 학습 전 · 목표만 보입니다', GX, 216 + RY);
+        ctx.font = '12px monospace'; ctx.fillStyle = INK3;
+        ctx.fillText('입력을 늘리거나 줄여서는 이 목표를', GX, 242 + RY);
+        ctx.fillText('만들 수 없습니다. [재료로 만들어보기]를 누르세요.', GX, 260 + RY);
+      }
     }
-    step();
+
+    let paused = false;
+    function loop() { if (!paused) { physics(); draw(); } requestAnimationFrame(loop); }
+
+    function resetAll() {
+      trained = false; fit = 0; t = 0; sq = 1; nextFlip = 40;
+      inHist.length = 0; tgtHist.length = 0; outHist.length = 0;
+      resHist.forEach(h => h.length = 0);
+      nodes.forEach(n => { n.x = n.x0; n.y = n.y0; n.vx = 0; n.vy = 0; });
+    }
+
+    $$('[data-res-task]').forEach(b => b.addEventListener('click', () => {
+      task = b.dataset.resTask;
+      resetAll();
+      $$('[data-res-task]').forEach(o => o.classList.toggle('btn--ghost', o !== b));
+      Sound.click();
+    }));
+    const trainBtn = $('[data-res-train]');
+    if (trainBtn) trainBtn.addEventListener('click', () => { paused = false; pauseBtn && (pauseBtn.textContent = '일시정지'); train(); });
+    const pauseBtn = $('[data-res-pause]');
+    if (pauseBtn) pauseBtn.addEventListener('click', () => {
+      paused = !paused; pauseBtn.textContent = paused ? '다시 재생' : '일시정지'; Sound.click();
+    });
+    const resetBtn = $('[data-res-reset]');
+    if (resetBtn) resetBtn.addEventListener('click', () => { resetAll(); paused = false; if (pauseBtn) pauseBtn.textContent = '일시정지'; Sound.click(); });
+
+    loop();
   })();
 
-  /* ---------- 3. 기계식 AND 게이트 ---------- */
-  (function logic() {
-    const svg = $('#logic'); if (!svg) return;
-    const NS = 'http://www.w3.org/2000/svg';
-    const st = { a: false, b: false, out: false };
-    function el(tag, attrs) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; }
-    // 입력 A, B: 위에서 누르는 블록. 출력: 가운데 좌굴 빔
-    const pa = el('rect', { x: 60, y: 20, width: 60, height: 30, fill: INK });
-    const pb = el('rect', { x: 280, y: 20, width: 60, height: 30, fill: INK });
-    el('text', { x: 90, y: 40, 'text-anchor': 'middle', fill: '#fff', 'font-size': 12, 'font-family': 'monospace' }).textContent = 'A';
-    el('text', { x: 310, y: 40, 'text-anchor': 'middle', fill: '#fff', 'font-size': 12, 'font-family': 'monospace' }).textContent = 'B';
-    const lever = el('path', { d: '', stroke: INK, 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round' });
-    const beam = el('path', { d: '', stroke: INK, 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' });
-    el('rect', { x: 150, y: 150, width: 100, height: 6, fill: INK });
-    const lbl = el('text', { x: 200, y: 172, 'text-anchor': 'middle', class: 'svg-label' });
-    function render() {
-      const da = st.a ? 30 : 0, db = st.b ? 30 : 0;
-      pa.setAttribute('y', 20 + da); pb.setAttribute('y', 20 + db);
-      // 레버: 두 입력이 밀어내린 평균만큼 가운데가 내려온다 (기계적 합산)
-      const mid = 70 + (da + db) / 2;
-      lever.setAttribute('d', `M90 ${52 + da} L200 ${mid} L310 ${52 + db}`);
-      // 빔: 합산 변위가 문턱(둘 다 눌림)을 넘으면 좌굴 → 쌍안정으로 고정
-      if (da + db >= 60 && !st.out) { st.out = true; Sound.snap(); }
-      const buck = st.out ? 40 : Math.min(8, (da + db) / 6);
-      beam.setAttribute('d', `M200 ${mid + 4} Q${200 + buck} ${(mid + 150) / 2} 200 150`);
-      beam.setAttribute('stroke', st.out ? INK : INK3);
-      lbl.textContent = `A=${+st.a} B=${+st.b} → 출력=${+st.out}${st.out ? ' (좌굴 유지: 메모리)' : ''}`;
+  /* ---------- 3-2. Physical Intelligence (크기 → 탑재 가능 부품) ---------- */
+  (function physIntel() {
+    const cv = $('#pi'); if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const slider = $('#pi-size'), out = $('#pi-out');
+
+    // 부품: 물리적으로 더 줄일 수 없는 최소 크기(mm)
+    const PARTS = [
+      { n: '배터리', min: 8, why: '전기화학 셀의 최소 부피' },
+      { n: '마이크로컨트롤러', min: 4, why: '다이 + 패키지 + 배선' },
+      { n: '무선 통신', min: 6, why: '안테나는 파장에 묶임' },
+      { n: '전자 센서', min: 2, why: '증폭 회로가 함께 필요' },
+      { n: '모터 / 액추에이터', min: 3, why: '자석·코일의 최소 크기' },
+    ];
+    // 재료로 구현되는 기능: 크기와 무관하게 살아남는다
+    const MAT = [
+      { n: '형태로 하는 감지', why: '휘어짐 자체가 신호' },
+      { n: '재질로 하는 구동', why: '수축·팽창하는 고분자' },
+      { n: '구조로 하는 제어', why: '형상이 반응을 결정' },
+    ];
+
+    let narrow = false, size = 50;
+    function layout() {
+      narrow = window.innerWidth <= 700;
+      if (narrow) { cv.width = 380; cv.height = 440; } else { cv.width = 620; cv.height = 260; }
     }
-    $$('[data-logic]').forEach(b => b.addEventListener('click', () => {
-      const k = b.dataset.logic;
-      if (k === 'reset') { st.a = st.b = st.out = false; }
-      else { st[k] = !st[k]; Sound.click(); }
-      render();
+
+    function draw() {
+      const W = cv.width, H = cv.height;
+      ctx.clearRect(0, 0, W, H);
+      ctx.font = '12px monospace'; ctx.textAlign = 'left';
+
+      // --- 로봇 몸통 ---
+      const half = narrow ? 62 : 92;
+      const cx = narrow ? W / 2 : 110, cy = narrow ? half + 28 : 128;
+      const px = 3 + (half - 6) * (Math.log10(size) - Math.log10(0.3)) / (Math.log10(100) - Math.log10(0.3));
+      ctx.fillStyle = INK3; ctx.fillText('로봇 몸통', cx - half, cy - half - 10);
+      ctx.strokeStyle = LINE; ctx.lineWidth = 1;
+      ctx.strokeRect(cx - half, cy - half, half * 2, half * 2);
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(cx, cy, Math.max(2, px), 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = INK2; ctx.textAlign = 'center';
+      ctx.fillText((size >= 10 ? size.toFixed(0) : size.toFixed(1)) + ' mm', cx, cy + half + 18);
+      ctx.textAlign = 'left';
+
+      // --- 부품 목록 ---
+      const X = narrow ? 16 : 240;
+      const WCOL = narrow ? 150 : 132;
+      let y = narrow ? cy + half + 46 : 22;
+      let dropped = 0;
+
+      ctx.fillStyle = INK3; ctx.fillText('전자 부품 · 계산 지능(CI)', X, y); y += 20;
+      PARTS.forEach(p => {
+        const fits = size >= p.min;
+        if (!fits) dropped++;
+        ctx.strokeStyle = fits ? INK : LINE; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.rect(X, y - 10, 12, 12); ctx.stroke();
+        if (fits) { ctx.fillStyle = INK; ctx.fillRect(X + 3, y - 7, 6, 6); }
+        ctx.fillStyle = fits ? INK : '#c2c2c2';
+        ctx.fillText(p.n, X + 20, y);
+        ctx.fillStyle = fits ? INK3 : '#c8c8c8';
+        ctx.fillText(fits ? '≥ ' + p.min + 'mm' : '탑재 불가', X + WCOL, y);
+        if (!fits) { ctx.strokeStyle = '#c8c8c8'; ctx.beginPath(); ctx.moveTo(X + 20, y - 4); ctx.lineTo(X + WCOL - 8, y - 4); ctx.stroke(); }
+        y += 21;
+      });
+
+      y += 12;
+      ctx.fillStyle = INK3; ctx.fillText('재료가 맡는 기능 · 물리 지능(PI)', X, y); y += 20;
+      MAT.forEach(m => {
+        ctx.strokeStyle = INK; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.rect(X, y - 10, 12, 12); ctx.stroke();
+        ctx.fillStyle = INK; ctx.fillRect(X + 3, y - 7, 6, 6);
+        ctx.fillStyle = INK; ctx.fillText(m.n, X + 20, y);
+        ctx.fillStyle = INK3; ctx.fillText(m.why, X + WCOL, y);
+        y += 21;
+      });
+
+      // --- 판정 ---
+      const brainGone = size < 4;
+      ctx.font = '13px monospace';
+      ctx.fillStyle = brainGone ? INK : INK2;
+      const msg = dropped === 0 ? '모든 부품이 들어갑니다 · 뇌를 실을 수 있습니다'
+        : brainGone ? '뇌가 빠졌습니다 · 남은 지능은 몸의 형태뿐입니다'
+        : '부품 ' + dropped + '개가 빠졌습니다';
+      ctx.fillText(msg, 16, H - 10);
+    }
+
+    function update() {
+      size = parseFloat(slider.value);
+      out.textContent = size >= 10 ? size.toFixed(0) : size.toFixed(1);
+      draw();
+    }
+    slider.addEventListener('input', update);
+    window.addEventListener('resize', () => { layout(); draw(); });
+    layout(); update();
+  })();
+
+  /* ---------- 3-3. Computational Composites ---------- */
+  (function composites() {
+    const box = $('#comp'); if (!box) return;
+    const res = $('#comp-result'), mp = $('#comp-mp');
+    const on = { code: false, mat: false };
+    let prop = null;
+
+    const HALF = {
+      none: ['아직 아무것도 없습니다', '둘 다 꺼져 있습니다.'],
+      code: ['앱이 하나 더 생겼습니다', '온도는 알지만, 확인하려면 화면을 꺼내 봐야 합니다 · 방 안에 있는 물건이 되지 못합니다.'],
+      mat:  ['그냥 물건입니다', '만질 수 있지만 온도를 모릅니다 · 어제와 오늘이 똑같습니다.'],
+    };
+    // 같은 연산 · 다른 물성 = 다른 물건
+    const PROPS = {
+      color: { n: '색', obj: '온도에 따라 색이 변하는 벽면',
+               good: '방에 들어서는 순간 <b>안 보고도 읽힙니다</b>. 시선을 뺏지 않습니다.',
+               bad: '어두우면 읽을 수 없고, 정확한 숫자는 알 수 없습니다.' },
+      shape: { n: '형태', obj: '더우면 오므라드는 조명 갓',
+               good: '멀리서도 알아보고, <b>공간의 분위기 자체가 정보</b>가 됩니다.',
+               bad: '천천히 움직여서 급한 변화는 놓칩니다.' },
+      stiff: { n: '단단함', obj: '추우면 뻣뻣해지는 손잡이',
+               good: '손이 닿는 순간 알게 됩니다 · <b>보지 않고 촉각으로</b> 읽힙니다.',
+               bad: '만져야만 알 수 있어서, 지나가면서는 모릅니다.' },
+    };
+
+    function render() {
+      const both = on.code && on.mat;
+      const k = both ? 'both' : on.code ? 'code' : on.mat ? 'mat' : 'none';
+      box.classList.toggle('is-both', both);
+      mp.hidden = !both;
+
+      if (!both) {
+        prop = null;
+        $$('[data-prop]', box).forEach(b => b.classList.add('btn--ghost'));
+        const [h, b] = HALF[k];
+        res.innerHTML = '<b>' + h + '</b><span>' + b + '</span>';
+        return;
+      }
+      if (!prop) {
+        res.innerHTML = '<b>Computational Composite가 되었습니다</b>'
+          + '<span>연산이 물건의 <b>속성으로</b> 나타납니다. 이제 남은 질문은 하나 · '
+          + '어떤 물성으로 표현할지입니다. 아래에서 골라보세요.</span>';
+        return;
+      }
+      const p = PROPS[prop];
+      res.innerHTML = '<b>' + p.obj + '</b>'
+        + '<span class="comp__good">' + p.good + '</span>'
+        + '<span class="comp__bad">다만 · ' + p.bad + '</span>'
+        + '<span class="comp__note">연산은 바꾸지 않았습니다. <b>물성만 바꿨는데 다른 물건</b>이 됩니다 · 이 선택이 Material Programming입니다.</span>';
+    }
+
+    $$('[data-comp]', box).forEach(b => b.addEventListener('click', () => {
+      const k = b.dataset.comp;
+      on[k] = !on[k];
+      b.classList.toggle('is-on', on[k]);
+      b.setAttribute('aria-pressed', String(on[k]));
+      Sound.click(); render();
+    }));
+    $$('[data-prop]', box).forEach(b => b.addEventListener('click', () => {
+      prop = b.dataset.prop;
+      $$('[data-prop]', box).forEach(o => o.classList.toggle('btn--ghost', o !== b));
+      Sound.click(); render();
     }));
     render();
   })();
@@ -821,15 +1109,16 @@
       { n: '원격 동기화', hint: '·' },
       { n: '개인화 추천', hint: '·' },
     ];
+    // mat > 0 : 재료 쪽으로 / mat < 0 : 소프트웨어 쪽으로
     const CRIT = [
-      { k: 'always', n: '항상 켜져 있어야 한다', mat: +1 },
-      { k: 'nopower', n: '전원을 쓸 수 없다', mat: +2 },
-      { k: 'tactile', n: '안 보고도 상태를 알아야 한다', mat: +1 },
-      { k: 'analog', n: '입력→출력이 연속 변환이다', mat: +1 },
-      { k: 'rulechange', n: '규칙이 자주 바뀐다', mat: -2 },
-      { k: 'remote', n: '다른 장소·사람과 상태를 공유한다', mat: -2 },
-      { k: 'combinatorial', n: '조건이 여러 개 조합된다', mat: -1 },
-      { k: 'history', n: '과거 기록을 남겨야 한다', mat: -1 },
+      { k: 'always', n: '항상 켜져 있어야 한다', mat: +1, why: '재료는 대기전력이 0입니다' },
+      { k: 'nopower', n: '전원을 쓸 수 없다', mat: +2, why: '전자장치는 아예 후보에서 빠집니다' },
+      { k: 'tactile', n: '안 보고도 상태를 알아야 한다', mat: +1, why: '형태는 손으로 읽힙니다' },
+      { k: 'analog', n: '입력→출력이 연속 변환이다', mat: +1, why: '물리 법칙이 곧 변환 함수입니다' },
+      { k: 'rulechange', n: '규칙이 자주 바뀐다', mat: -2, why: '한번 굳은 형태는 업데이트가 안 됩니다' },
+      { k: 'remote', n: '다른 장소·사람과 상태를 공유한다', mat: -2, why: '재료는 그 자리를 못 벗어납니다' },
+      { k: 'combinatorial', n: '조건이 여러 개 조합된다', mat: -1, why: '경우의 수만큼 구조가 복잡해집니다' },
+      { k: 'history', n: '과거 기록을 남겨야 한다', mat: -1, why: '재료의 기억은 용량이 아주 작습니다' },
     ];
     let func = FUNCS[0]; const on = new Set();
     FUNCS.forEach((f, i) => {
@@ -839,24 +1128,62 @@
     });
     const critBox = $('#tradeoff-criteria');
     CRIT.forEach(c => {
-      const l = document.createElement('label'); l.className = 'crit';
-      l.innerHTML = `<input type="checkbox"> ${c.n}`;
+      const l = document.createElement('label'); l.className = 'crit' + (c.mat > 0 ? ' crit--mat' : ' crit--sw');
+      l.title = c.why;
+      const tag = (c.mat > 0 ? '재료 +' : '소프트 +') + Math.abs(c.mat);
+      l.innerHTML = '<input type="checkbox"><span class="crit__n">' + c.n + '</span><span class="crit__w">' + tag + '</span>';
       l.querySelector('input').addEventListener('change', e => { e.target.checked ? on.add(c.k) : on.delete(c.k); l.classList.toggle('is-on', e.target.checked); render(); });
       critBox.appendChild(l);
     });
     const verdict = $('#tradeoff-verdict');
     function render() {
-      let score = 0; CRIT.forEach(c => { if (on.has(c.k)) score += c.mat; });
-      const pct = Math.round(50 + score * 10);
-      const clamped = Math.max(5, Math.min(95, pct));
-      let msg;
-      if (on.size === 0) msg = '조건을 켜보세요.';
-      else if (score >= 2) msg = '이 계층은 재료로 내려보낼 만합니다. 센서·MCU를 빼고 형태·재질이 그 일을 맡게 하세요.';
-      else if (score <= -2) msg = '이 계층은 소프트웨어에 남겨두는 게 맞습니다. 대신 그 아래 계층(입력 검증, 상태 표시)만 재료로 내려보낼 수 있는지 보세요.';
-      else msg = '경계 지점입니다. 하이브리드 · 재료가 1차 반응을 하고 소프트웨어가 예외만 다루는 구조가 어울립니다.';
-      verdict.innerHTML = `<strong>${func.n}</strong><p class="muted">물성 사례: ${func.hint}</p>
-        <div class="bar"><i style="width:${clamped}%"></i></div>
-        <div class="bar-label"><span>소프트웨어</span><span>재료</span></div><p>${msg}</p>`;
+      const picked = CRIT.filter(c => on.has(c.k));
+      const score = picked.reduce((s, c) => s + c.mat, 0);
+      const matSum = picked.filter(c => c.mat > 0).reduce((s, c) => s + c.mat, 0);
+      const swSum = picked.filter(c => c.mat < 0).reduce((s, c) => s - c.mat, 0);
+      const clamped = Math.max(5, Math.min(95, Math.round(50 + score * 10)));
+
+      let head, msg;
+      if (!picked.length) { head = '조건을 켜보세요'; msg = '조건마다 붙은 숫자만큼 게이지가 좌우로 움직입니다.'; }
+      else if (score >= 2) { head = '재료로 내려보낼 만합니다'; msg = '센서·MCU를 빼고 형태·재질이 그 일을 맡게 하세요.'; }
+      else if (score <= -2) { head = '소프트웨어에 남겨두세요'; msg = '대신 그 아래 계층(입력 검증, 상태 표시)만 재료로 내려보낼 수 있는지 보세요.'; }
+      else { head = '경계 지점입니다'; msg = '하이브리드 · 재료가 1차 반응을 하고 소프트웨어가 예외만 다루는 구조가 어울립니다.'; }
+
+      // 게이지가 뭘 뜻하는지: 위치가 아니라 "확신의 정도"를 읽는다
+      const dist = Math.abs(score);
+      let reading;
+      if (!picked.length) {
+        reading = '지금은 한가운데입니다 · 아직 근거가 없으니 어느 쪽도 아닙니다.';
+      } else if (dist === 0) {
+        reading = '가운데에 멈췄습니다 · 양쪽 근거가 <b>팽팽하게 맞선다</b>는 뜻입니다. 한쪽을 고르기보다 기능을 더 잘게 쪼개 보세요.';
+      } else if (dist === 1) {
+        reading = '가운데에서 조금 벗어났습니다 · <b>약하게 기울었을 뿐</b>이라 조건 하나만 바뀌어도 뒤집힙니다.';
+      } else if (dist <= 3) {
+        reading = '한쪽으로 뚜렷하게 기울었습니다 · <b>이 방향으로 시도해 볼 근거가 충분</b>합니다.';
+      } else {
+        reading = '끝까지 밀렸습니다 · <b>반대쪽은 사실상 후보가 아닙니다.</b>';
+      }
+
+      // 근거: 어떤 조건이 어느 쪽으로 얼마나 밀었는지
+      const rows = picked.length
+        ? '<ul class="reasons">' + picked
+            .slice().sort((a, b) => b.mat - a.mat)
+            .map(c => '<li class="' + (c.mat > 0 ? 'is-mat' : 'is-sw') + '"><b>' + (c.mat > 0 ? '→ 재료' : '← 소프트') + ' ' + Math.abs(c.mat) + '</b> ' + c.n + ' <span class="muted">· ' + c.why + '</span></li>')
+            .join('') + '</ul>'
+        : '';
+
+      const tally = picked.length
+        ? '<p class="tally"><span>재료 ' + matSum + '</span> vs <span>소프트웨어 ' + swSum + '</span> → 합계 ' + (score > 0 ? '+' : '') + score + '</p>'
+        : '';
+
+      verdict.innerHTML = '<strong>' + func.n + '</strong><p class="muted">물성 사례: ' + func.hint + '</p>'
+        + '<p class="bar-legend">게이지는 <b>어느 쪽이 맞는지</b>(좌우)와 <b>얼마나 확실한지</b>(가운데에서 멀어진 정도)를 함께 보여줍니다.</p>'
+        + '<div class="bar"><span class="bar__mid"></span><i style="width:' + clamped + '%"></i></div>'
+        + '<div class="bar-label"><span>← 코드로 짜는 게 낫다</span><span>가운데 = 팽팽함</span><span>형태·재질로 만드는 게 낫다 →</span></div>'
+        + tally
+        + '<p class="bar-reading">' + reading + '</p>'
+        + '<p class="verdict__head">' + head + '</p><p>' + msg + '</p>'
+        + rows;
     }
     render();
   })();

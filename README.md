@@ -5,7 +5,7 @@
 
 - 일상의 사례: 깔때기, 바이메탈, USB-C, 셔틀콕·수동 보행기, 가장자리 천공 카드
 - 연구 사례: bioLogic, Morphing Pasta·Thermorph, Jacquard·Foldio, Radical Atoms·4D Printing
-- 이론: Morphological Computation, Physical Reservoir Computing, Mechanical Logic, Physical Intelligence, Material Programming
+- 이론: Morphological Computation, Physical Reservoir Computing, Physical Intelligence, Material Programming
 - 판정 도구: 어떤 계층의 계산을 재료로 내려보낼지
 
 ## 실행
