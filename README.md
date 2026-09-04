@@ -12,6 +12,10 @@
 
 빌드 없음. 정적 HTML/CSS/JS.
 
+**바로 보기 → https://gekodesignkisung.github.io/morphocomp/**
+
+로컬에서 실행하려면:
+
 ```
 python -m http.server 4080
 ```
