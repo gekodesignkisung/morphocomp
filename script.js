@@ -139,11 +139,31 @@
       entries.forEach(en => { if (en.isIntersecting) { setActive(map.get(en.target.id)); renderSub(en.target.id); } });
     }, { rootMargin: '-60px 0px -70% 0px' });
     map.forEach((a, id) => { const el = document.getElementById(id); if (el) io.observe(el); });
-    // 최상단(마스트헤드)에서는 서브메뉴를 숨긴다 · 아직 어떤 섹션도 보고 있지 않으므로
-    const mast = $('.masthead');
-    if (mast) new IntersectionObserver(es => es.forEach(en => {
-      if (en.isIntersecting && performance.now() >= lockUntil) { setActive(null); renderSub(null); }
-    }), { rootMargin: '-60px 0px -70% 0px' }).observe(mast);
+    // 최상단에서만 메뉴를 "선택 없음" 상태로 둔다.
+    // 기준은 마스트헤드가 보이는지가 아니라 바가 아직 고정되지 않았는지 ·
+    // rootMargin(-70%)으로 보면 바가 이미 붙은 뒤에도 한참 최상단 취급이라
+    // 스크롤했는데 메뉴가 왼쪽에 그대로 있고 서브메뉴도 안 나오는 구간이 생겼다.
+    // 최상단이면 "선택 없음", 조금이라도 내려가면 현재 위치에 해당하는 섹션을 고른다.
+    // IntersectionObserver의 rootMargin만으로는 두 조건 사이에 빈 구간이 생겨
+    // 스크롤했는데 메뉴가 왼쪽에 그대로이고 서브메뉴도 안 나왔다.
+    function currentSection() {
+      const line = (window.scrollY || 0) + 120;   // 고정 바 바로 아래 기준선
+      let found = null;
+      map.forEach((a, id) => {
+        const el = document.getElementById(id); if (!el) return;
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        if (top <= line) found = id;              // 기준선을 지난 마지막 섹션
+      });
+      return found;
+    }
+    function syncTop() {
+      if (performance.now() < lockUntil) return;
+      if ((window.scrollY || 0) < 8) { setActive(null); renderSub(null); return; }
+      const id = currentSection();
+      if (id) { setActive(map.get(id)); renderSub(id); }
+    }
+    window.addEventListener('scroll', syncTop, { passive: true });
+    syncTop();
   })();
 
   /* ---------- 코드 / 재료 탭 ---------- */
