@@ -63,7 +63,9 @@ b, strong { font-weight: 700; }
   opacity: 0; transition: opacity .2s;            /* 고정된 뒤에만 보임 */
 }
 .topbar.is-stuck .topbar__title { opacity: 1; color: var(--ink); font-weight: 700; }
-.topbar__nav { display: flex; margin-left: auto; font-size: 16px; white-space: nowrap; overflow-x: auto; }
+.topbar__nav { display: flex; margin-left: auto; font-size: 16px; white-space: nowrap; overflow-x: auto; transition: margin .25s ease; }
+/* 최상단에서는 선택된 섹션이 없으므로 대메뉴를 가운데 둔다 */
+.topbar__nav.is-centered { margin-left: auto; margin-right: auto; }
 .topbar__nav a {
   position: relative; display: flex; align-items: center; padding: 0 18px;
   text-decoration: none; color: var(--ink-3); transition: color .15s;
@@ -73,6 +75,8 @@ b, strong { font-weight: 700; }
 .topbar__nav a.is-active { color: var(--ink); font-weight: 700; }
 .topbar__nav a.is-active::after { background: var(--ink); }
 .topbar__nav a:last-child { padding-right: 0; }
+/* 가운데 정렬일 때는 좌우 패딩이 대칭이어야 실제로 가운데로 보인다 */
+.topbar__nav.is-centered a:last-child { padding-right: 18px; }
 
 /* 서브메뉴: 현재 섹션의 하위 항목 (topbar 안, ::after 가로선 위에 얹힘) */
 .subbar { position: relative; background: #fff; }
@@ -397,6 +401,22 @@ pre.compare__panel { font-family: var(--mono); font-size: 13px; line-height: 1.6
 .sources__lead { font-size: 12px; margin: 0 0 14px; }
 .sources__group { font-size: 12px; font-family: var(--mono); color: var(--ink-3); font-weight: 400; margin: 16px 0 6px; letter-spacing: .03em; }
 .sources__group:first-of-type { margin-top: 0; }
+/* 아주 좁은 화면(360px 미만)에서 넘치던 것들 정리
+   · 코드 블록과 데모 판은 그리드/플렉스 자식이라 min-width:auto가 기본이어서
+     내용 길이만큼 부풀며 페이지 전체에 가로 스크롤을 만들었다 */
+.demo, .demo__stage, .compare, .case__body, .case__media, .table-wrap { min-width: 0; }
+pre.compare__panel { max-width: 100%; }
+@media (max-width: 420px) {
+  pre.compare__panel { font-size: 12px; padding: 12px; }
+  .demo__stage { padding: 12px; }
+  .compare__panel { padding: 12px; }
+  .section { padding: 36px 0; }
+  .masthead { padding-left: 16px; padding-right: 16px; }
+  .wrap, .footer { padding-left: 16px; padding-right: 16px; }
+  .figure figcaption { font-size: 12px; }
+  .demo__controls { gap: 8px 10px; }
+  .btn { padding: 8px 12px; font-size: 13px; }
+}
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
   .case, .demo--full, .sources { grid-template-columns: 1fr; }
@@ -407,11 +427,24 @@ pre.compare__panel { font-family: var(--mono); font-size: 13px; line-height: 1.6
 
 /* 모바일 상단 메뉴 · 가로 스크롤이 되지만 그 사실이 안 보이던 문제 */
 @media (max-width: 700px) {
-  .topbar__inner { gap: 0; padding: 0 16px; height: 48px; }
-  /* 제목은 고정된 뒤에만 나타나는데 좁은 폭에서는 메뉴를 밀어낸다 */
-  .topbar__title { display: none; }
+  /* 제목을 메뉴 위에 세로로 쌓는다. 아래 패딩은 0 ·
+     메뉴 밑줄이 바의 가로선과 정확히 같은 높이에 오도록 */
+  .topbar__inner {
+    flex-direction: column; align-items: stretch; gap: 10px;
+    padding: 14px 16px 0; height: auto;
+  }
+  /* 제목은 가운데 · 고정 전에는 자리를 차지하지 않는다 */
+  .topbar__title {
+    justify-content: center; font-size: 18px; height: 0; overflow: hidden;
+    transition: height .2s;
+  }
+  .topbar.is-stuck .topbar__title { height: 28px; }
+  /* 메뉴 줄이 가로선에 닿도록 높이를 준다 */
+  .topbar__nav a { height: 40px; }
   .topbar__nav {
     margin-left: 0; width: 100%; font-size: 14px;
+    /* 항목이 다 들어가면 가운데, 넘치면 왼쪽부터(잘리지 않도록) */
+    justify-content: safe center;
     -webkit-overflow-scrolling: touch; scrollbar-width: none;
     /* 오른쪽 끝이 흐려져 "더 있다"가 보인다 */
     -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
@@ -419,23 +452,23 @@ pre.compare__panel { font-family: var(--mono); font-size: 13px; line-height: 1.6
   }
   .topbar__nav::-webkit-scrollbar { display: none; }
   .topbar__nav a { padding: 0 12px; flex: 0 0 auto; }
-  .topbar__nav a:first-child { padding-left: 0; }
-  .topbar__nav a:last-child { padding-right: 24px; }
+  .topbar__nav a:first-child { padding-left: 12px; }
+  .topbar__nav a:last-child { padding-right: 12px; }
 
   .subbar__inner {
-    justify-content: flex-start; padding-left: 16px; padding-right: 16px; height: 36px;
+    justify-content: safe center; padding: 6px 16px; height: 42px;
     scrollbar-width: none;
     -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
             mask-image: linear-gradient(to right, #000 88%, transparent);
   }
   .subbar__inner::-webkit-scrollbar { display: none; }
   .subbar__inner a { padding: 0 12px; flex: 0 0 auto; font-size: 13px; }
-  .subbar__inner a:first-child { padding-left: 0; }
-  .subbar__inner a:last-child { padding-right: 24px; }
+  .subbar__inner a:first-child { padding-left: 12px; }
+  .subbar__inner a:last-child { padding-right: 12px; }
 
-  /* 바가 낮아진 만큼 앵커 보정도 줄인다 */
-  .section, #top { scroll-margin-top: 52px; }
-  .case[id], .theory__item[id], .grid[id], .tradeoff[id], .table-wrap[id] { scroll-margin-top: 92px; }
+  /* 바 높이에 맞춰 앵커 보정 */
+  .section, #top { scroll-margin-top: 60px; }
+  .case[id], .theory__item[id], .grid[id], .tradeoff[id], .table-wrap[id] { scroll-margin-top: 104px; }
 }
 @media (max-width: 560px) {
   .grid, .demo__stage--row { grid-template-columns: 1fr; }

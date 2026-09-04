@@ -72,7 +72,13 @@
     const subbar = $('#subbar'), subInner = $('#subbar-inner');
     const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
     let curSection, lockUntil = 0;
-    const setActive = a => { links.forEach(l => l.classList.remove('is-active')); if (a) a.classList.add('is-active'); };
+    const nav = $('.topbar__nav');
+    const setActive = a => {
+      links.forEach(l => l.classList.remove('is-active'));
+      if (a) a.classList.add('is-active');
+      // 최상단(활성 섹션 없음)에서는 대메뉴를 가운데로
+      if (nav) nav.classList.toggle('is-centered', !a);
+    };
     const setSub = id => $$('a', subInner).forEach(a => a.classList.toggle('is-active', a.dataset.sub === id));
     const subIO = new IntersectionObserver(entries => {
       if (performance.now() < lockUntil) return;
@@ -123,16 +129,11 @@
       entries.forEach(en => { if (en.isIntersecting) { setActive(map.get(en.target.id)); renderSub(en.target.id); } });
     }, { rootMargin: '-60px 0px -70% 0px' });
     map.forEach((a, id) => { const el = document.getElementById(id); if (el) io.observe(el); });
-    // 최상단(마스트헤드)에서도 서브메뉴는 유지한다 · 대메뉴 강조만 해제하고
-    // 첫 섹션의 하위 항목을 그대로 띄워 둔다(스크롤 중 목차가 사라지지 않도록)
-    const FIRST = Object.keys(SUB)[0];
+    // 최상단(마스트헤드)에서는 서브메뉴를 숨긴다 · 아직 어떤 섹션도 보고 있지 않으므로
     const mast = $('.masthead');
     if (mast) new IntersectionObserver(es => es.forEach(en => {
-      if (en.isIntersecting && performance.now() >= lockUntil) { setActive(null); renderSub(FIRST); }
+      if (en.isIntersecting && performance.now() >= lockUntil) { setActive(null); renderSub(null); }
     }), { rootMargin: '-60px 0px -70% 0px' }).observe(mast);
-
-    // 초기 진입 시에도 서브메뉴가 보이도록
-    renderSub(FIRST);
   })();
 
   /* ---------- 코드 / 재료 탭 ---------- */
