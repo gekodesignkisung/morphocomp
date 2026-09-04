@@ -1,86 +1,92 @@
 {
- "walker": {
-  "file": "img/walker.gif",
-  "title": "Passive dynamic walker.gif",
-  "artist": "Stpedraz",
-  "license": "CC BY-SA 4.0",
-  "page": "https://commons.wikimedia.org/wiki/File:Passive_dynamic_walker.gif"
- },
- "usbc": {
-  "file": "img/usbc.png",
-  "title": "USB-C connector and receptacle.webp",
-  "artist": "Wikideas1",
-  "license": "CC0",
-  "page": "https://commons.wikimedia.org/wiki/File:USB-C_connector_and_receptacle.webp"
- },
- "shuttlecock": {
-  "file": "img/shuttlecock.jpg",
-  "title": "Koogan badminton feather shuttlecock 01.JPG",
-  "artist": "Stanislas PERRIN",
-  "license": "Public domain",
-  "page": "https://commons.wikimedia.org/wiki/File:Koogan_badminton_feather_shuttlecock_01.JPG"
- },
- "keysort": {
-  "file": "img/keysort.jpg",
-  "title": "McBee-Keysort-cards-front-and-rear.jpg",
-  "artist": "Museum of Obsolete Media",
-  "license": "CC BY-SA 4.0",
-  "page": "https://commons.wikimedia.org/wiki/File:McBee-Keysort-cards-front-and-rear.jpg"
- },
- "jacquard": {
-  "file": "img/jacquard.jpg",
-  "title": "A Jacquard loom showing information punchcards, National Museum of Scotland.jpg",
-  "artist": "Stephencdickson",
-  "license": "CC BY-SA 4.0",
-  "page": "https://commons.wikimedia.org/wiki/File:A_Jacquard_loom_showing_information_punchcards,_National_Museum_of_Scotland.jpg"
- },
- "hourglass": {
-  "file": "img/hourglass.jpg",
-  "title": "Hourglass with sand.jpg",
-  "artist": "John Morgan",
-  "license": "CC BY 2.0",
-  "page": "https://commons.wikimedia.org/wiki/File:Hourglass_with_sand.jpg"
- },
- "funnel": {
-  "file": "img/funnel.jpg",
-  "title": "Funnel MET DP234124.jpg",
-  "artist": "",
-  "license": "CC0",
-  "page": "https://commons.wikimedia.org/wiki/File:Funnel_MET_DP234124.jpg"
- },
- "zipper": {
-  "file": "img/zipper.jpg",
-  "title": "Plastic watertight drysuit zipper closed teeth detail P8110024.jpg",
-  "artist": "Peter Southwood",
-  "license": "CC BY-SA 4.0",
-  "page": "https://commons.wikimedia.org/wiki/File:Plastic_watertight_drysuit_zipper_closed_teeth_detail_P8110024.jpg"
- },
- "bimetal_photo": {
-  "file": "img/bimetal_photo.jpg",
-  "title": "Bimetallic strip from circuit breaker.JPG",
-  "artist": "Dmitry G",
-  "license": "CC BY-SA 3.0",
-  "page": "https://commons.wikimedia.org/wiki/File:Bimetallic_strip_from_circuit_breaker.JPG"
- },
- "textile": {
-  "file": "img/textile.jpg",
-  "title": "Textile-sensor2.jpg",
-  "artist": "Faktiva",
-  "license": "CC BY-SA 4.0",
-  "page": "https://commons.wikimedia.org/wiki/File:Textile-sensor2.jpg"
- },
- "biologic_real": {
-  "file": "img/biologic_real.png",
-  "title": "bioLogic fabric (2015-bioLogic badge)",
-  "artist": "MIT Tangible Media Group",
-  "license": "CC BY-NC-ND 3.0",
-  "page": "https://tangible.media.mit.edu/project/biologic/"
- },
- "pasta_paper": {
-  "file": "img/pasta_paper.jpg",
-  "title": "Morphing pasta and beyond, Fig. 1",
-  "artist": "Ye Tao, Lining Yao et al.",
-  "license": "CC BY-NC 4.0",
-  "page": "https://www.science.org/doi/10.1126/sciadv.abf4098"
- }
+  "walker": {
+    "file": "img/walker.gif",
+    "title": "Passive dynamic walker.gif",
+    "artist": "Stpedraz",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Passive_dynamic_walker.gif"
+  },
+  "usbc": {
+    "file": "img/usbc.png",
+    "title": "USB-C connector and receptacle.webp",
+    "artist": "Wikideas1",
+    "license": "CC0",
+    "page": "https://commons.wikimedia.org/wiki/File:USB-C_connector_and_receptacle.webp"
+  },
+  "shuttlecock": {
+    "file": "img/shuttlecock.jpg",
+    "title": "Koogan badminton feather shuttlecock 01.JPG",
+    "artist": "Stanislas PERRIN",
+    "license": "Public domain",
+    "page": "https://commons.wikimedia.org/wiki/File:Koogan_badminton_feather_shuttlecock_01.JPG"
+  },
+  "keysort": {
+    "file": "img/keysort.jpg",
+    "title": "McBee-Keysort-cards-front-and-rear.jpg",
+    "artist": "Museum of Obsolete Media",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:McBee-Keysort-cards-front-and-rear.jpg"
+  },
+  "jacquard": {
+    "file": "img/jacquard.jpg",
+    "title": "A Jacquard loom showing information punchcards, National Museum of Scotland.jpg",
+    "artist": "Stephencdickson",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:A_Jacquard_loom_showing_information_punchcards,_National_Museum_of_Scotland.jpg"
+  },
+  "hourglass": {
+    "file": "img/hourglass.jpg",
+    "title": "Hourglass with sand.jpg",
+    "artist": "John Morgan",
+    "license": "CC BY 2.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Hourglass_with_sand.jpg"
+  },
+  "funnel": {
+    "file": "img/funnel.jpg",
+    "title": "Funnel MET DP234124.jpg",
+    "artist": "",
+    "license": "CC0",
+    "page": "https://commons.wikimedia.org/wiki/File:Funnel_MET_DP234124.jpg"
+  },
+  "zipper": {
+    "file": "img/zipper.jpg",
+    "title": "Plastic watertight drysuit zipper closed teeth detail P8110024.jpg",
+    "artist": "Peter Southwood",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Plastic_watertight_drysuit_zipper_closed_teeth_detail_P8110024.jpg"
+  },
+  "bimetal_photo": {
+    "file": "img/bimetal_photo.jpg",
+    "title": "Bimetallic strip from circuit breaker.JPG",
+    "artist": "Dmitry G",
+    "license": "CC BY-SA 3.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Bimetallic_strip_from_circuit_breaker.JPG"
+  },
+  "textile": {
+    "file": "img/textile.jpg",
+    "title": "Textile-sensor2.jpg",
+    "artist": "Faktiva",
+    "license": "CC BY-SA 4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Textile-sensor2.jpg"
+  },
+  "biologic_real": {
+    "file": "img/biologic_real.png",
+    "title": "bioLogic fabric (2015-bioLogic badge)",
+    "artist": "MIT Tangible Media Group",
+    "license": "CC BY-NC-ND 3.0",
+    "page": "https://tangible.media.mit.edu/project/biologic/"
+  },
+  "pasta_paper": {
+    "file": "img/pasta_paper.jpg",
+    "title": "Morphing pasta and beyond, Fig. 1",
+    "artist": "Ye Tao, Lining Yao et al.",
+    "license": "CC BY-NC 4.0",
+    "page": "https://www.science.org/doi/10.1126/sciadv.abf4098"
+  },
+  "coinsorter": {
+    "title": "File:Adjutor coin counter, LM Ericsson, 1909 AD - Tekniska museet - Stockholm, Sweden - DSC01551.JPG",
+    "artist": "Daderot",
+    "license": "CC0",
+    "page": "https://commons.wikimedia.org/wiki/File:Adjutor_coin_counter,_LM_Ericsson,_1909_AD_-_Tekniska_museet_-_Stockholm,_Sweden_-_DSC01551.JPG"
+  }
 }

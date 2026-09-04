@@ -395,12 +395,46 @@ pre.compare__panel { font-family: var(--mono); font-size: 13px; line-height: 1.6
 .sources__lead { font-size: 12px; margin: 0 0 14px; }
 .sources__group { font-size: 12px; font-family: var(--mono); color: var(--ink-3); font-weight: 400; margin: 16px 0 6px; letter-spacing: .03em; }
 .sources__group:first-of-type { margin-top: 0; }
+.sorter-illust { width: 100%; height: auto; display: block; background: var(--paper-2); border-radius: 10px; }
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
   .case, .demo--full, .sources { grid-template-columns: 1fr; }
   .topbar__inner { gap: 14px; }
   .topbar__nav a { padding: 0 10px; }
   .masthead { padding-top: 36px; }
+}
+
+/* 모바일 상단 메뉴 · 가로 스크롤이 되지만 그 사실이 안 보이던 문제 */
+@media (max-width: 700px) {
+  .topbar__inner { gap: 0; padding: 0 16px; height: 48px; }
+  /* 제목은 고정된 뒤에만 나타나는데 좁은 폭에서는 메뉴를 밀어낸다 */
+  .topbar__title { display: none; }
+  .topbar__nav {
+    margin-left: 0; width: 100%; font-size: 14px;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    /* 오른쪽 끝이 흐려져 "더 있다"가 보인다 */
+    -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
+            mask-image: linear-gradient(to right, #000 88%, transparent);
+  }
+  .topbar__nav::-webkit-scrollbar { display: none; }
+  .topbar__nav a { padding: 0 12px; flex: 0 0 auto; }
+  .topbar__nav a:first-child { padding-left: 0; }
+  .topbar__nav a:last-child { padding-right: 24px; }
+
+  .subbar__inner {
+    justify-content: flex-start; padding: 0 16px; height: 36px;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
+            mask-image: linear-gradient(to right, #000 88%, transparent);
+  }
+  .subbar__inner::-webkit-scrollbar { display: none; }
+  .subbar__inner a { padding: 0 12px; flex: 0 0 auto; font-size: 13px; }
+  .subbar__inner a:first-child { padding-left: 0; }
+  .subbar__inner a:last-child { padding-right: 24px; }
+
+  /* 바가 낮아진 만큼 앵커 보정도 줄인다 */
+  .section, #top { scroll-margin-top: 52px; }
+  .case[id], .theory__item[id], .grid[id], .tradeoff[id], .table-wrap[id] { scroll-margin-top: 92px; }
 }
 @media (max-width: 560px) {
   .grid, .demo__stage--row { grid-template-columns: 1fr; }

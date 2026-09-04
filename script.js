@@ -63,7 +63,7 @@
   (function topnav() {
     const links = $$('.topbar__nav a'); if (!links.length) return;
     const SUB = {
-      everyday: [['sec-funnel', '깔때기'], ['sec-bimetal', '바이메탈'], ['sec-usb', 'USB-C'], ['sec-shuttlecock', '셔틀콕'], ['sec-notched', '동전 분류기'], ['sec-more', '지퍼·모래시계']],
+      everyday: [['sec-funnel', '깔때기'], ['sec-bimetal', '바이메탈'], ['sec-usb', 'USB-C'], ['sec-shuttlecock', '셔틀콕'], ['sec-sorter', '동전 분류기'], ['sec-notched', '천공 카드'], ['sec-more', '지퍼·모래시계']],
       research: [['sec-biologic', 'bioLogic'], ['sec-pasta', 'Morphing Pasta'], ['sec-jacquard', 'Jacquard·Foldio']],
       theory: [['sec-morph', 'Morphological'], ['sec-reservoir', 'Reservoir'], ['sec-pi', 'Physical Intelligence'], ['sec-composites', 'Material Programming']],
       tradeoff: [['sec-picker', '판정 도구'], ['sec-table', '비교표']],
@@ -406,6 +406,136 @@
       requestAnimationFrame(step);
     }
     step();
+  })();
+
+  /* ---------- 1-5 가장자리 천공 카드 ---------- */
+  (function notched() {
+    const cv = $('#notched'); if (!cv) return;
+    const ctx = cv.getContext('2d');
+
+    const ATTRS = ['채식', '서울', '주말'];
+    // 카드 12장 · 각 속성의 홈 여부(true = 잘려서 홈)
+    const CARDS = [
+      [1,1,0],[0,1,1],[1,0,1],[1,1,1],[0,0,1],[1,1,0],
+      [0,1,0],[1,0,0],[1,1,1],[0,0,0],[1,0,1],[0,1,1],
+    ].map((n, i) => ({ notch: n, id: i + 1, x: 0, y: 0, drop: 0, falls: false }));
+
+    const on = [true, false, false];
+    let lifted = false, t = 0, narrow = false;
+
+    function layout() {
+      narrow = window.innerWidth <= 700;
+      cv.width = narrow ? 380 : 620;
+      cv.height = narrow ? 340 : 300;
+    }
+
+    function matches(c) { return on.every((v, i) => !v || c.notch[i]); }
+
+    function lift() {
+      lifted = true; t = 0;
+      CARDS.forEach(c => { c.falls = matches(c); c.drop = 0; });
+      Sound.snap();
+    }
+    function reset() { lifted = false; t = 0; CARDS.forEach(c => { c.drop = 0; c.falls = false; }); }
+
+    function draw() {
+      const W = cv.width, H = cv.height;
+      ctx.clearRect(0, 0, W, H);
+      ctx.font = '12px monospace'; ctx.textAlign = 'left';
+
+      const cols = 6, cw = narrow ? 54 : 88, ch = narrow ? 74 : 92;
+      const gapX = narrow ? 8 : 12, gapY = narrow ? 14 : 20;
+      const x0 = (W - (cols * cw + (cols - 1) * gapX)) / 2;
+      const y0 = 44;
+
+      // 막대: 켜진 속성 자리에 가로로 꽂힌다
+      ctx.fillStyle = INK3;
+      ctx.fillText('카드 ' + CARDS.length + '장 · 가장자리 구멍 3개 = 속성 3개', x0, 20);
+
+      CARDS.forEach((c, i) => {
+        const col = i % cols, row = Math.floor(i / cols);
+        c.x = x0 + col * (cw + gapX);
+        const baseY = y0 + row * (ch + gapY);
+        // 떨어지는 카드는 아래로, 걸린 카드는 막대에 매달려 살짝 위로
+        if (lifted) {
+          if (c.falls) c.drop = Math.min(c.drop + 2.2, 46);
+          else c.drop = Math.max(c.drop - 0.6, -10);
+        }
+        c.y = baseY + c.drop;
+
+        const fell = lifted && c.falls;
+        ctx.fillStyle = fell ? '#fff' : 'var(--paper-2)';
+        ctx.fillStyle = fell ? '#ffffff' : '#f2f2f2';
+        ctx.strokeStyle = fell ? INK : LINE;
+        ctx.lineWidth = fell ? 2 : 1;
+        ctx.beginPath(); ctx.rect(c.x, c.y, cw, ch); ctx.fill(); ctx.stroke();
+
+        // 가장자리 구멍 3개 (위쪽 변)
+        c.notch.forEach((cut, k) => {
+          const hx = c.x + (k + 1) * cw / 4, hy = c.y + 9;
+          ctx.strokeStyle = on[k] ? INK : LINE;
+          ctx.lineWidth = 1.2;
+          if (cut) {
+            // 홈: 가장자리까지 열린 U자
+            ctx.beginPath();
+            ctx.moveTo(hx - 4, c.y);
+            ctx.lineTo(hx - 4, hy); ctx.arc(hx, hy, 4, Math.PI, 0, true); ctx.lineTo(hx + 4, c.y);
+            ctx.stroke();
+          } else {
+            ctx.beginPath(); ctx.arc(hx, hy, 4, 0, Math.PI * 2); ctx.stroke();
+          }
+        });
+
+        ctx.fillStyle = fell ? INK : '#bbb';
+        ctx.font = '11px monospace';
+        ctx.fillText('#' + c.id, c.x + 6, c.y + ch - 8);
+      });
+
+      // 막대 (켜진 속성마다 한 줄)
+      if (!narrow) {
+        on.forEach((v, k) => {
+          if (!v) return;
+          const hx0 = x0 + (k + 1) * cw / 4;
+          ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
+          for (let row = 0; row < 2; row++) {
+            const ry = y0 + row * (ch + gapY) + 9 + (lifted ? -10 : 0);
+            ctx.beginPath();
+            ctx.moveTo(x0 - 14, ry);
+            ctx.lineTo(x0 + cols * cw + (cols - 1) * gapX + 14, ry);
+            ctx.stroke();
+          }
+        });
+      }
+
+      // 결과
+      const hit = CARDS.filter(matches).length;
+      const labels = ATTRS.filter((_, i) => on[i]);
+      ctx.font = '13px monospace'; ctx.textAlign = 'left';
+      ctx.fillStyle = lifted ? INK : INK2;
+      const q = labels.length ? labels.join(' AND ') : '(조건 없음)';
+      ctx.fillText(lifted
+        ? q + ' → ' + hit + '장이 떨어졌습니다'
+        : q + ' · 막대를 꽂았습니다. 들어올려 보세요.', 14, H - 14);
+
+      if (lifted) t++;
+      requestAnimationFrame(draw);
+    }
+
+    $$('[data-notch]').forEach(b => b.addEventListener('click', () => {
+      const k = +b.dataset.notch;
+      on[k] = !on[k];
+      b.classList.toggle('btn--ghost', !on[k]);
+      reset(); Sound.click();
+    }));
+    const liftBtn = $('[data-notch-lift]');
+    if (liftBtn) liftBtn.addEventListener('click', () => {
+      if (lifted) { reset(); liftBtn.textContent = '막대 들어올리기'; Sound.click(); }
+      else { lift(); liftBtn.textContent = '카드 되돌리기'; }
+    });
+
+    layout();
+    window.addEventListener('resize', () => layout());
+    draw();
   })();
 
   /* ---------- 2-1 bioLogic ---------- */

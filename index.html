@@ -291,15 +291,38 @@
   </article>
 
   <!-- 1-4 Edge-notched card -->
-  <article class="case" id="sec-notched">
+  <!-- 1-4 동전 분류기 -->
+  <article class="case" id="sec-sorter">
     <div class="case__media">
       <figure class="figure">
-        <img src="img/keysort.jpg" alt="McBee Keysort 가장자리 천공 카드 앞뒤" loading="lazy">
-        <figcaption>같은 원리의 데이터 버전: 가장자리 천공 카드(1950–60년대). 태그 자리를 홈으로 잘라두면, 막대를 꽂아 들어올릴 때 홈 난 카드만 떨어진다. 검색을 중력이 실행했다. Museum of Obsolete Media, CC BY-SA 4.0</figcaption>
+        <img src="img/coinsorter.jpg" alt="1909년 Adjutor 동전 계수기 · 지름에 맞는 구멍으로 동전을 걸러내는 원판" loading="lazy">
+        <figcaption>Adjutor 동전 계수기(LM Ericsson, 1909). 원판의 구멍이 정해진 지름의 동전만 받아 세었다 · 재는 장치 없이 구멍의 크기가 곧 판정이다. Tekniska museet 소장. Daderot, CC0</figcaption>
       </figure>
       <figure class="figure figure--small">
-        <img src="img/jacquard.jpg" alt="천공 카드로 패턴을 제어하는 자카드 직기" loading="lazy">
-        <figcaption>천공 카드가 직조 패턴을 "프로그램"하는 자카드 직기(1804). Stephencdickson, CC BY-SA 4.0</figcaption>
+        <svg class="sorter-illust" viewBox="0 0 320 210" role="img" aria-label="구멍이 작은 것부터 큰 순서로 뚫린 분류 레일 도해">
+          <line x1="24" y1="46" x2="296" y2="80" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="24" y1="80" x2="296" y2="114" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="34" cy="42" r="9" fill="#111"/>
+          <g fill="#fff" stroke="#111" stroke-width="1.5">
+            <rect x="86" y="60" width="16" height="12" rx="1"/>
+            <rect x="160" y="70" width="23" height="12" rx="1"/>
+            <rect x="238" y="80" width="31" height="12" rx="1"/>
+          </g>
+          <g font-family="monospace" font-size="10" fill="#888" text-anchor="middle">
+            <text x="94" y="54">작은 구멍</text>
+            <text x="171" y="64">중간</text>
+            <text x="253" y="74">큰 구멍</text>
+            <text x="94" y="144">소</text><text x="171" y="144">중</text><text x="253" y="144">대</text>
+          </g>
+          <g fill="none" stroke="#888" stroke-width="1" stroke-dasharray="3 3">
+            <path d="M94 78 L94 126"/><path d="M171 88 L171 126"/><path d="M253 98 L253 126"/>
+          </g>
+          <g fill="none" stroke="#111" stroke-width="1.5">
+            <path d="M70 132 h48 v48 h-48 z"/><path d="M147 132 h48 v48 h-48 z"/><path d="M229 132 h48 v48 h-48 z"/>
+          </g>
+          <text x="160" y="200" font-family="monospace" font-size="10" fill="#888" text-anchor="middle">구멍의 오름차순 배치 = 정렬된 if-else 사다리</text>
+        </svg>
+        <figcaption>여러 종류를 한 번에 나누는 분류 레일. 동전은 자기 지름보다 큰 <b>첫 구멍</b>에서 떨어진다.</figcaption>
       </figure>
     </div>
     <div class="case__body">
@@ -331,8 +354,43 @@
   arm.move(coin, bin)    // 분류 액추에이터</code></pre>
           <div class="compare__panel" id="card-mat">
             <p><b>측정</b> = 구멍을 통과하는가 못 하는가<br><b>분기</b> = 구멍이 작은 순서로 놓인 배치<br><b>분류</b> = 중력</p>
-            <p class="muted">왼쪽 사진의 가장자리 천공 카드는 같은 원리로 <b>검색</b>을 실행한 컴퓨터 이전의 데이터베이스입니다.</p>
           </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 1-5 가장자리 천공 카드 -->
+  <article class="case" id="sec-notched">
+    <div class="case__media">
+      <figure class="figure">
+        <img src="img/keysort.jpg" alt="McBee Keysort 가장자리 천공 카드 앞뒤" loading="lazy">
+        <figcaption>가장자리 천공 카드(1950–60년대). 태그 자리를 홈으로 잘라두면, 막대를 꽂아 들어올릴 때 홈 난 카드만 떨어진다. Museum of Obsolete Media, CC BY-SA 4.0</figcaption>
+      </figure>
+      <figure class="figure figure--small">
+        <img src="img/jacquard.jpg" alt="천공 카드로 패턴을 제어하는 자카드 직기" loading="lazy">
+        <figcaption>천공 카드가 직조 패턴을 "프로그램"하는 자카드 직기(1804). Stephencdickson, CC BY-SA 4.0</figcaption>
+      </figure>
+    </div>
+    <div class="case__body">
+      <h3 class="case__title">가장자리 천공 카드 <span class="case__tag">검색을 중력이 실행 · 컴퓨터 이전의 데이터베이스</span></h3>
+      <p>카드 한 장이 레코드 하나입니다. 가장자리의 구멍마다 속성이 하나씩 배정돼 있고,
+      해당하면 그 구멍을 <b>가장자리까지 잘라 홈으로</b> 만듭니다. 검색할 때는 그 자리에 막대를 꽂아 통째로 들어올립니다 ·
+      구멍이 온전한 카드는 막대에 걸려 딸려 올라오고, <b>홈이 난 카드만 아래로 떨어집니다.</b> 떨어진 쪽이 검색 결과입니다.</p>
+      <p>비교도 순회도 없습니다. 카드가 1만 장이어도 걸리는 시간은 똑같습니다 ·
+      한 번 들어올리면 <b>전체가 동시에 판정</b>되기 때문입니다. 막대를 여러 자리에 함께 꽂으면 그게 AND 검색입니다.</p>
+
+      <div class="demo">
+        <div class="demo__stage">
+          <canvas id="notched" width="620" height="300" aria-label="가장자리 천공 카드 검색 시뮬레이션"></canvas>
+          <div class="demo__controls">
+            <span class="demo__label">막대를 꽂을 자리</span>
+            <button class="btn" data-notch="0">채식</button>
+            <button class="btn btn--ghost" data-notch="1">서울</button>
+            <button class="btn btn--ghost" data-notch="2">주말</button>
+            <button class="btn btn--ghost" data-notch-lift>막대 들어올리기</button>
+          </div>
+          <p class="demo__hint">속성을 고르고 <b>들어올리기</b>를 누르세요. 홈이 난 카드만 떨어집니다 · 여러 개를 켜면 AND 검색입니다.</p>
         </div>
       </div>
     </div>
@@ -704,6 +762,6 @@
     <a class="signature__link" href="https://www.corca.ai/ax" target="_blank" rel="noopener noreferrer">Corca AX</a></p>
 </footer>
 
-<script src="script.js?v=65"></script>
+<script src="script.js?v=66"></script>
 </body>
 </html>
