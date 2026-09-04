@@ -76,9 +76,9 @@ b, strong { font-weight: 700; }
 
 /* 서브메뉴: 현재 섹션의 하위 항목 (topbar 안, ::after 가로선 위에 얹힘) */
 .subbar { position: relative; background: #fff; }
-.subbar__inner { max-width: var(--max); margin: 0 auto; padding: 0 24px; height: 40px; display: flex; justify-content: flex-end; overflow-x: auto; white-space: nowrap; }
+/* 서브메뉴는 활성 대메뉴 항목의 중앙에 맞춘다(위치는 JS의 alignSub이 padding-left로 지정) */
+.subbar__inner { max-width: var(--max); margin: 0 auto; padding-left: 24px; padding-right: 24px; height: 40px; display: flex; justify-content: flex-start; overflow-x: auto; white-space: nowrap; }
 .subbar__inner a { display: flex; align-items: center; padding: 0 18px; font-size: 14px; color: var(--ink-3); text-decoration: none; position: relative; }
-.subbar__inner a:last-child { padding-right: 0; }
 .subbar__inner a:hover { color: var(--ink); }
 .subbar__inner a.is-active { color: var(--ink); }
 .subbar[hidden] { display: none; }
@@ -395,7 +395,6 @@ pre.compare__panel { font-family: var(--mono); font-size: 13px; line-height: 1.6
 .sources__lead { font-size: 12px; margin: 0 0 14px; }
 .sources__group { font-size: 12px; font-family: var(--mono); color: var(--ink-3); font-weight: 400; margin: 16px 0 6px; letter-spacing: .03em; }
 .sources__group:first-of-type { margin-top: 0; }
-.sorter-illust { width: 100%; height: auto; display: block; background: var(--paper-2); border-radius: 10px; }
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
   .case, .demo--full, .sources { grid-template-columns: 1fr; }
@@ -422,7 +421,7 @@ pre.compare__panel { font-family: var(--mono); font-size: 13px; line-height: 1.6
   .topbar__nav a:last-child { padding-right: 24px; }
 
   .subbar__inner {
-    justify-content: flex-start; padding: 0 16px; height: 36px;
+    justify-content: flex-start; padding-left: 16px; padding-right: 16px; height: 36px;
     scrollbar-width: none;
     -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
             mask-image: linear-gradient(to right, #000 88%, transparent);

@@ -78,6 +78,35 @@
       if (performance.now() < lockUntil) return;
       entries.forEach(en => { if (en.isIntersecting) setSub(en.target.id); });
     }, { rootMargin: '-100px 0px -60% 0px' });
+    // 서브메뉴를 활성 대메뉴 항목 아래 중앙에 맞춘다.
+    // 좁은 화면(가로 스크롤)에서는 브라우저 정렬에 맡긴다.
+    function alignSub(section) {
+      if (!section || subbar.hidden) return;
+      if (window.innerWidth <= 700) { subInner.style.paddingLeft = ''; return; }
+      const tab = map.get(section);
+      const kids = $$('a', subInner); if (!kids.length) return;
+      // 대메뉴 강조가 없는 최상단에서는 보정 없이 기본 위치
+      if (!tab) { subInner.style.paddingLeft = ''; return; }
+
+      // 기준값을 재기 전에 이전 보정을 지운다 (누적 방지)
+      subInner.style.paddingLeft = '0px';
+
+      const innerC = subInner.getBoundingClientRect();      // 실제 트랙(max-width 적용된 박스)
+      const first = kids[0].getBoundingClientRect();
+      const last = kids[kids.length - 1].getBoundingClientRect();
+      const contentW = last.right - first.left;             // 링크 묶음의 실제 폭
+      const tabC = tab.getBoundingClientRect();
+
+      // 대메뉴 항목의 중심을 subInner 좌표계로
+      const center = tabC.left + tabC.width / 2 - innerC.left;
+      let pad = center - contentW / 2;
+
+      // 트랙 안에 가둔다 (좌우 24px 여백 유지)
+      const maxPad = innerC.width - contentW - 24;
+      pad = Math.min(Math.max(pad, 24), Math.max(24, maxPad));
+      subInner.style.paddingLeft = pad + 'px';
+    }
+
     function renderSub(section) {
       if (section === curSection) return; curSection = section;
       const items = SUB[section] || [];
@@ -85,16 +114,25 @@
       subbar.hidden = items.length === 0;
       $$('a', subInner).forEach(a => a.addEventListener('click', () => { setSub(a.dataset.sub); lockUntil = performance.now() + 900; }));
       subIO.disconnect(); items.forEach(([id]) => { const el = document.getElementById(id); if (el) subIO.observe(el); });
+      alignSub(section);
     }
+    window.addEventListener('resize', () => alignSub(curSection));
     links.forEach(a => a.addEventListener('click', () => { setActive(a); renderSub(a.getAttribute('href').slice(1)); lockUntil = performance.now() + 900; }));
     const io = new IntersectionObserver(entries => {
       if (performance.now() < lockUntil) return;
       entries.forEach(en => { if (en.isIntersecting) { setActive(map.get(en.target.id)); renderSub(en.target.id); } });
     }, { rootMargin: '-60px 0px -70% 0px' });
     map.forEach((a, id) => { const el = document.getElementById(id); if (el) io.observe(el); });
-    // 최상단(마스트헤드)에서는 서브메뉴 숨김
+    // 최상단(마스트헤드)에서도 서브메뉴는 유지한다 · 대메뉴 강조만 해제하고
+    // 첫 섹션의 하위 항목을 그대로 띄워 둔다(스크롤 중 목차가 사라지지 않도록)
+    const FIRST = Object.keys(SUB)[0];
     const mast = $('.masthead');
-    if (mast) new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting && performance.now() >= lockUntil) { setActive(null); renderSub(null); } }), { rootMargin: '-60px 0px -70% 0px' }).observe(mast);
+    if (mast) new IntersectionObserver(es => es.forEach(en => {
+      if (en.isIntersecting && performance.now() >= lockUntil) { setActive(null); renderSub(FIRST); }
+    }), { rootMargin: '-60px 0px -70% 0px' }).observe(mast);
+
+    // 초기 진입 시에도 서브메뉴가 보이도록
+    renderSub(FIRST);
   })();
 
   /* ---------- 코드 / 재료 탭 ---------- */
