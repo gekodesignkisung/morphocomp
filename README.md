@@ -1,9 +1,9 @@
 # Morphocomp · 형태가 계산한다
 
-디자인 스터디 "인터페이스는 화면과 센서에서 끝나는가"를 위한 인터랙티브 설명 페이지.
+디자인 스터디를 위한 인터랙티브 설명 페이지.
 형태·재질·구조가 소프트웨어를 대신하는 사례를 직접 만져보며 이해한다.
 
-- 일상의 사례: 깔때기, 바이메탈 온도조절기, USB-A→USB-C, 셔틀콕, 동전 분류기·가장자리 천공 카드
+- 일상의 사례: 깔때기, 바이메탈 온도조절기, USB-A→USB-C, 셔틀콕, 동전 분류기, 가장자리 천공 카드, 지퍼·모래시계
 - 연구 사례: bioLogic, Morphing Pasta·Thermorph, Project Jacquard·Foldio
 - 이론: Morphological Computation, Physical Reservoir Computing, Physical Intelligence, Computational Composites·Material Programming
 - 판정 도구: 어떤 계층의 계산을 재료로 내려보낼지 + 재료/소프트웨어 비교표
