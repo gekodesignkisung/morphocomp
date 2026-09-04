@@ -456,18 +456,18 @@ pre.compare__panel { max-width: 100%; }
             mask-image: linear-gradient(to right, #000 88%, transparent);
   }
   .topbar__nav::-webkit-scrollbar { display: none; }
-  .topbar__nav a { padding: 0 12px; flex: 0 0 auto; }
+  .topbar__nav a { padding: 0 10px; flex: 0 0 auto; }
   .topbar__nav a:first-child { padding-left: 12px; }
   .topbar__nav a:last-child { padding-right: 12px; }
 
   .subbar__inner {
     justify-content: safe center; padding: 6px 16px; height: 42px;
     scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
-            mask-image: linear-gradient(to right, #000 88%, transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 94%, transparent);
+            mask-image: linear-gradient(to right, #000 94%, transparent);
   }
   .subbar__inner::-webkit-scrollbar { display: none; }
-  .subbar__inner a { padding: 0 12px; flex: 0 0 auto; font-size: 13px; }
+  .subbar__inner a { padding: 0 9px; flex: 0 0 auto; font-size: 13px; }
   .subbar__inner a:first-child { padding-left: 12px; }
   .subbar__inner a:last-child { padding-right: 12px; }
 

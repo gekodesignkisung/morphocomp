@@ -79,7 +79,17 @@
       // 최상단(활성 섹션 없음)에서는 대메뉴를 왼쪽으로
       if (nav) nav.classList.toggle('is-start', !a);
     };
-    const setSub = id => $$('a', subInner).forEach(a => a.classList.toggle('is-active', a.dataset.sub === id));
+    const setSub = id => {
+      $$('a', subInner).forEach(a => a.classList.toggle('is-active', a.dataset.sub === id));
+      // 좁은 화면에서는 항목이 다 보이지 않으므로 현재 항목을 스크롤해서 보여준다
+      const cur = $$('a', subInner).find(a => a.dataset.sub === id);
+      if (cur && subInner.scrollWidth > subInner.clientWidth + 1) {
+        const c = cur.getBoundingClientRect(), t = subInner.getBoundingClientRect();
+        if (c.left < t.left + 8 || c.right > t.right - 8) {
+          subInner.scrollTo({ left: subInner.scrollLeft + (c.left - t.left) - (t.width - c.width) / 2, behavior: 'smooth' });
+        }
+      }
+    };
     const subIO = new IntersectionObserver(entries => {
       if (performance.now() < lockUntil) return;
       entries.forEach(en => { if (en.isIntersecting) setSub(en.target.id); });
