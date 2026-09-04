@@ -14,14 +14,6 @@
 
 **바로 보기 → https://gekodesignkisung.github.io/morphocomp/**
 
-로컬에서 실행하려면:
-
-```
-python -m http.server 4080
-```
-
-http://localhost:4080 (이미지 크레딧 목록이 fetch라 서버가 필요)
-
 ## 구조
 
 - `index.html` 본문·데모 마크업
