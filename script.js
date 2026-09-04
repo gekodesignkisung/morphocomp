@@ -121,8 +121,10 @@
     const GRAV = 0.12;   // 느리게 떨어져야 눈에 보인다
     const drops = [];
     let collected = 0, level = 0;
+    // 캔버스가 화면 밖이면 소리도 애니메이션도 멈춘다
+    let onScreen = true, running = false;
 
-    function spawn(x, y) {
+    function spawn(x, y, silent) {
       const r = 5;
       // x: 깔때기 입구 안으로만 (바깥을 누르면 가장 가까운 가장자리로)
       x = Math.max(leftWall.x1 + r + 2, Math.min(rightWall.x1 - r - 2, x));
@@ -133,7 +135,7 @@
         return w.y1 + (w.y2 - w.y1) * Math.max(0, Math.min(1, t));
       };
       y = Math.min(y, wallYAt(x) - r - 2);
-      drops.push({ x, y, vx: 0, vy: 0, r });
+      drops.push({ x, y, vx: 0, vy: 0, r, silent });
       if (drops.length > 120) drops.shift();
     }
     function reflect(d, wall) {
@@ -146,7 +148,7 @@
       const dist = (d.x - px) * nx + (d.y - py) * ny;
       const side = wall === leftWall ? -1 : 1; // 법선(nx,ny) 기준 깔때기 안쪽 방향
       if (dist * side < d.r) {
-        if (!d.onWall) { d.onWall = true; Sound.tick(); }
+        if (!d.onWall) { d.onWall = true; if (!d.silent && onScreen) Sound.tick(); }
         // 벽 위로 올려놓고 법선 속도만 제거 → 접선 방향으로 미끄러진다
         d.x = px + nx * side * d.r; d.y = py + ny * side * d.r;
         const vn = d.vx * nx + d.vy * ny;
@@ -178,10 +180,10 @@
         d.vy += GRAV; d.x += d.vx; d.y += d.vy;
         reflect(d, leftWall); reflect(d, rightWall);
         if (d.y > neckY && d.y < H - 40) { d.x += (neckX - d.x) * 0.5; d.vx = 0; }
-        if (d.y > H - 40) { drops.splice(i, 1); collected++; level += 3; Sound.drip(Math.min(28, level)); continue; }
+        if (d.y > H - 40) { drops.splice(i, 1); collected++; level += 3; if (!d.silent && onScreen) Sound.drip(Math.min(28, level)); continue; }
         ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill();
       }
-      requestAnimationFrame(step);
+      if (onScreen) requestAnimationFrame(step); else running = false;
     }
     function pos(e) {
       const r = cv.getBoundingClientRect();
@@ -197,8 +199,12 @@
     window.addEventListener('pointerup', () => dragging = false);
     window.addEventListener('pointercancel', () => dragging = false);
     // 초기 시연: 천천히 8개
-    let n = 0; const auto = setInterval(() => { spawn(100 + Math.random() * (W - 200), 20); if (++n >= 8) clearInterval(auto); }, 450);
-    step();
+    let n = 0; const auto = setInterval(() => { spawn(100 + Math.random() * (W - 200), 20, true); if (++n >= 8) clearInterval(auto); }, 450);
+    new IntersectionObserver(([en]) => {
+      onScreen = en.isIntersecting;
+      if (onScreen && !running) { running = true; requestAnimationFrame(step); }
+    }, { threshold: 0 }).observe(cv);
+    running = true; step();
   })();
 
   /* ---------- 1-1 바이메탈 ---------- */
